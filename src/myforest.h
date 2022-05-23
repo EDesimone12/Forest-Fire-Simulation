@@ -16,6 +16,7 @@ void generation(char matrix[N][N]){
     for(int i=1; i < N; i++)
         matrix[i] = matrix[0] + i*N; */
 
+    srand(42);
     for(int i=0; i < N; i++){
         for(int j =0; j < N; j++){
             if((rand() %101) <= P){
@@ -108,8 +109,9 @@ char* prepareForCheck(char* preNeighbor,char* recvBuff,char* destNeighbor,int* s
         return arr;
 }
 
-char* check(char** temp, char* sendCount, int prec, int dest, int total){
+char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total){
     int start = 0;
+    srand(rank+1); //Annullo il comportamento si srand(1);
 
     //Starting point
     if(prec == -10){
@@ -117,10 +119,17 @@ char* check(char** temp, char* sendCount, int prec, int dest, int total){
     }else{
         start = sendCount[prec];
     }
-
+    int i = 0;
+    printf("rand %d rank %d\n",rand(),rank);
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++ ){
+            if(prec != -10){
 
+            }else if(dest != -10){
+
+            }else{
+
+            }
         }
     }
 }
