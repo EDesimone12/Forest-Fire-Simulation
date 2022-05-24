@@ -39,6 +39,17 @@ void print_forest(char f[N][N]){
     printf("--------------------------------------------------\n");
 }
 
+void print_forest_array(char * temp){
+    for(int i = 0; i < N; i++){
+        printf("--------------------------------------------------\n");
+        for(int j = 0; j < N; j++){
+            printf("| %c |",temp[((i*N)+j)]);
+        }
+        printf("\n");
+    }
+    printf("--------------------------------------------------\n");
+}
+
 void precDest (int my_rank, int size_p, int *prec , int* dest){
     if(my_rank == 1){
         *prec = -10 ; //Il primo processo non ha precedenti
@@ -109,27 +120,38 @@ char* prepareForCheck(char* preNeighbor,char* recvBuff,char* destNeighbor,int* s
         return arr;
 }
 
-char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total){
+char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total) {
     int start = 0;
-    srand(rank+1); //Annullo il comportamento si srand(1);
+    srand(rank + 1); //Annullo il comportamento si srand(1);
 
     //Starting point
-    if(prec == -10){
+    if (prec == -10) {
         start = 0;
-    }else{
+    } else {
         start = sendCount[prec];
     }
-    int i = 0;
-    printf("rand %d rank %d\n",rand(),rank);
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++ ){
-            if(prec != -10){
 
-            }else if(dest != -10){
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
 
-            }else{
+            if (*temp[((i * N) + j)] == '3') { //1)A burning cell turns into an empty cell
+                *temp[((i * N) + j)] = 2;
+            }
+
+            if (*temp[((i * N) + j)] == '2') { //4)An empty space fills with a tree with probability P
+                if ((rand() % 101) <= P) {
+                    *temp[((i * N) + j)] = '1';
+                }
+            }
+
+            if (prec == -10) {
+                //if(temp[(((i+1)*N)+j) == ]
+            } else if (dest != -10) {
+
+            } else {
 
             }
         }
     }
+    //print_forest_array(*temp);
 }
