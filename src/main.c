@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
 
         int total = 0;
         char* tempMatrix = prepareForCheck(preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
-        char*sendBuff = check(&tempMatrix,sendCount,my_rank,prec,dest,total);
+        char* sendBuff = check(&tempMatrix,sendCount,my_rank,prec,dest,total);
 
         //printf("Total = %d  Myrank = %d\n",total,my_rank);
 

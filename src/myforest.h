@@ -39,9 +39,15 @@ void print_forest(char f[N][N]){
     printf("--------------------------------------------------\n");
 }
 
-void print_forest_array(char * temp){
+void print_forest_array(char * temp,int rank){
+
     for(int i = 0; i < N; i++){
-        printf("--------------------------------------------------\n");
+        if(i == 0){
+            printf("--------------------RANK %d------------------------------\n",rank);
+        }else{
+            printf("--------------------------------------------------\n");
+        }
+
         for(int j = 0; j < N; j++){
             printf("| %c |",temp[((i*N)+j)]);
         }
@@ -108,8 +114,8 @@ char* prepareForCheck(char* preNeighbor,char* recvBuff,char* destNeighbor,int* s
             memcpy(arr+sendCount[my_rank],destNeighbor,sendCount[dest]);
             *total += sendCount[dest];
         }
-        /* //Stampa per verifica della creazione dela matrice temporanea
-        int count = 0;
+         //Stampa per verifica della creazione dela matrice temporanea
+        /*int count = 0;
         for(int i = 0; i < N; i++){
             for(int j = 0; j < N; j++){
                 printf("(rank = %d i=%d j=%d count=%d) -elem [%d] = %c\n",my_rank,i,j,count,((i*N)+j),arr[((i*N)+j)]);
@@ -122,7 +128,9 @@ char* prepareForCheck(char* preNeighbor,char* recvBuff,char* destNeighbor,int* s
 
 char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total) {
     int start = 0;
-    srand(rank + 1); //Annullo il comportamento si srand(1);
+    char *retMatrix = malloc(sizeof *retMatrix * N * N);
+
+    srand(rank + 1); //Annullo il comportamento di srand(1);
 
     //Starting point
     if (prec == -10) {
@@ -133,25 +141,27 @@ char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total)
 
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-
-            if (*temp[((i * N) + j)] == '3') { //1)A burning cell turns into an empty cell
-                *temp[((i * N) + j)] = 2;
-            }
-
-            if (*temp[((i * N) + j)] == '2') { //4)An empty space fills with a tree with probability P
-                if ((rand() % 101) <= P) {
-                    *temp[((i * N) + j)] = '1';
-                }
+            if(total == 0){
+                break;
             }
 
             if (prec == -10) {
-                //if(temp[(((i+1)*N)+j) == ]
-            } else if (dest != -10) {
+                if ((*temp)[((i * N) + j)] == '3') { //1)A burning cell turns into an empty cell
+                    retMatrix[0] = '2';
+                }
+
+                if ((*temp)[((i * N) + j)] == '2') { //4)An empty space fills with a tree with probability P
+                    if ((rand() % 101) <= P) {
+                        retMatrix[((i * N) + j)] = '1';
+                    }
+                }
+            } else if (dest == -10) {
 
             } else {
 
             }
+            total--;
         }
     }
-    //print_forest_array(*temp);
+    print_forest_array(*temp,rank);
 }
