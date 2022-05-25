@@ -40,20 +40,25 @@ void print_forest(char f[N][N]){
 }
 
 void print_forest_array(char * temp,int rank){
+    char *fileName = (char*) malloc(sizeof(char)*25); //20 Dim of the text
+    FILE *fp;
+    sprintf(fileName,"output_check_%d.txt",rank);
+    printf("output_check_%d.txt",rank);
+    fp = fopen(fileName,"w");
 
     for(int i = 0; i < N; i++){
         if(i == 0){
-            printf("--------------------RANK %d------------------------------\n",rank);
+            fprintf(fp,"--------------------RANK %d------------------------------\n",rank);
         }else{
-            printf("--------------------------------------------------\n");
+            fprintf(fp,"--------------------------------------------------\n");
         }
 
         for(int j = 0; j < N; j++){
-            printf("| %c |",temp[((i*N)+j)]);
+            fprintf(fp,"| %c |",temp[((i*N)+j)]);
         }
-        printf("\n");
+        fprintf(fp,"\n");
     }
-    printf("--------------------------------------------------\n");
+    fprintf(fp,"--------------------------------------------------\n");
 }
 
 void precDest (int my_rank, int size_p, int *prec , int* dest){
@@ -96,7 +101,6 @@ void divWork(int size,int** sendCount, int** displacement){
 
 char* prepareForCheck(char* preNeighbor,char* recvBuff,char* destNeighbor,int* sendCount,int my_rank,int prec, int dest,int* total){
         char *arr = malloc(sizeof *arr * N * N);
-
         if(prec != -10){
             memcpy(arr,preNeighbor,sendCount[prec]);
             *total += sendCount[prec];
