@@ -151,7 +151,7 @@ char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total)
 
             if (prec == -10) {
                 if ((*temp)[((i * N) + j)] == '3') { //1)A burning cell turns into an empty cell
-                    retMatrix[0] = '2';
+                    retMatrix[((i * N) + j)] = '2';
                 }
 
                 if ((*temp)[((i * N) + j)] == '2') { //4)An empty space fills with a tree with probability P
@@ -167,5 +167,6 @@ char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total)
             total--;
         }
     }
-    print_forest_array(*temp,rank);
+    print_forest_array(retMatrix,rank);
+    return retMatrix;
 }
