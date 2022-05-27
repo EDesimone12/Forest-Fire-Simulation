@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wchar.h>
 
 #define TAG 42
 #define N 10   //Matrix Dimension
@@ -40,10 +41,11 @@ void print_forest(char f[N][N]){
 }
 
 void print_forest_array(char * temp,int rank){
-    char *fileName = (char*) malloc(sizeof(char)*25); //20 Dim of the text
+    char *fileName = (char*) malloc(sizeof(char)*25); //Dim of the fileName string
+
     FILE *fp;
     sprintf(fileName,"output_check_%d.txt",rank);
-    printf("output_check_%d.txt",rank);
+
     fp = fopen(fileName,"w");
 
     for(int i = 0; i < N; i++){
@@ -143,21 +145,21 @@ char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total)
         start = sendCount[prec];
     }
 
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            if(total == 0){
-                break;
-            }
-
+    for (int i = 0; i < N && total != 0; i++) {
+        for(int j = 0; j < N; j++){
             if (prec == -10) {
-                if ((*temp)[((i * N) + j)] == '3') { //1)A burning cell turns into an empty cell
-                    retMatrix[((i * N) + j)] = '2';
+                if ((*temp)[(i*N)+j] == '3') { //1)A burning cell turns into an empty cell
+                    retMatrix[(i*N)+j] = '2';
                 }
 
-                if ((*temp)[((i * N) + j)] == '2') { //4)An empty space fills with a tree with probability P
+                if ((*temp)[(i*N)+j] == '2') { //4)An empty space fills with a tree with probability P
                     if ((rand() % 101) <= P) {
-                        retMatrix[((i * N) + j)] = '1';
+                        retMatrix[(i*N)+j] = '1';
                     }
+                    printf("rank = %d retMatrix[%d] = %c\n", rank,(i*N)+j,retMatrix[(i*N)+j]);
+                }
+                if(1){
+
                 }
             } else if (dest == -10) {
 
