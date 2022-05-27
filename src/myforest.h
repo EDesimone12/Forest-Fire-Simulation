@@ -7,10 +7,9 @@
 #define N 10   //Matrix Dimension
 #define F 10    //Ignite probability F(Fire)
 #define P 70       //New Tree probability 
+// 1(TREE) 2(EMPTY) 3(BURNING TREE)
 
 void generation(char matrix[N][N]){
-    // 1(TREE) 2(EMPTY) 3(BURNING TREE)
-
     /*matrix = (char **)malloc(N*sizeof(char *)); //Array of pointer
     matrix[0] = (char *)malloc(N*N*sizeof(char)); //Matrix
 
@@ -147,6 +146,7 @@ char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total)
 
     for (int i = 0; i < N && total != 0; i++) {
         for(int j = 0; j < N; j++){
+
             if (prec == -10) {
                 if ((*temp)[(i*N)+j] == '3') { //1)A burning cell turns into an empty cell
                     retMatrix[(i*N)+j] = '2';
@@ -156,11 +156,37 @@ char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total)
                     if ((rand() % 101) <= P) {
                         retMatrix[(i*N)+j] = '1';
                     }
-                    printf("rank = %d retMatrix[%d] = %c\n", rank,(i*N)+j,retMatrix[(i*N)+j]);
+                    printf("4) rank = %d retMatrix[%d] = %c\n", rank,(i*N)+j,retMatrix[(i*N)+j]);
                 }
-                if(1){
 
-                }
+                if(j == 0 && ((i*N)+j+1) != '3' && (((i+1)*N)+j) != '3' ){ //3)A tree ignites with probability F even if no neighbor is burning
+                    if((rand() % 101) <= F){
+                        retMatrix[(i*N)+j] = '3';
+                    }
+                    printf("3)rank = %d retMatrix[%d] = %c\n", rank,(i*N)+j,retMatrix[(i*N)+j]);
+                }else if(j == (N-1) && ((i*N)+(j-1)) != '3' && (((i+1)*N)+j) != '3'){
+                    if((rand() % 101) <= F){
+                        retMatrix[(i*N)+j] = '3';
+                    }
+                    printf("3)rank = %d retMatrix[%d] = %c\n", rank,(i*N)+j,retMatrix[(i*N)+j]);
+                }else if( ((i*N)+j-1) != '3' && ((i*N)+j+1) != '3' && (((i+1)*N)+j) != '3'){
+                    if((rand() % 101) <= F){
+                        retMatrix[(i*N)+j] = '3';
+                    }
+                    printf("3)rank = %d retMatrix[%d] = %c\n", rank,(i*N)+j,retMatrix[(i*N)+j]);
+                } // 3) END -------------------------------------------------------
+
+                if((j == 0) && ( ((i*N)+j+1) == '3' || (((i+1)*N)+j) == '3') ){ //2)A tree will burn if at least one neighbor is burning
+                    retMatrix[(i*N)+j] = '3';
+                    printf("2)rank = %d retMatrix[%d] = %c\n", rank,(i*N)+j,retMatrix[(i*N)+j]);
+                }else if( (j == (N-1)) && ( ((i*N)+(j-1)) == '3' || (((i+1)*N)+j) ) == '3') {
+                    retMatrix[(i*N)+j] = '3';
+                    printf("2)rank = %d retMatrix[%d] = %c\n", rank,(i*N)+j,retMatrix[(i*N)+j]);
+                }else if(((i*N)+j-1) == '3' || ((i*N)+j+1) == '3' || (((i+1)*N)+j) == '3'){
+                    retMatrix[(i*N)+j] = '3';
+                    printf("2)rank = %d retMatrix[%d] = %c\n", rank,(i*N)+j,retMatrix[(i*N)+j]);
+                }// 2) END ---------------------------------------------------------
+
             } else if (dest == -10) {
 
             } else {
