@@ -132,24 +132,28 @@ char* prepareForCheck(char* preNeighbor,char* recvBuff,char* destNeighbor,int* s
 }
 
 char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total) {
-    int start = 0;
+    int startI = 0;
+    int startJ = 0;
+    int flag = 1;
     char *retMatrix = malloc(sizeof *retMatrix * N * N);
 
     srand(rank + 1); //Annullo il comportamento di srand(1);
 
     //Starting point
     if (prec == -10) {
-        start = 0;
+        startI = 0;
+        startJ = 0;
     } else {
-        start = sendCount[prec];
+        startI = (sendCount[prec] / N);
+        startJ = (sendCount[prec] % N);
     }
-    /*
-     * 1) Calcolare il modulo N di start ed assegnare ad i e J , i = (start / N)  j = (start % N)
-     * 2) Utilizzo un flag per effettuare quest'operazione solo alla prima iterazione su J
-     */
-    for (int i = 0; i < N && total != 0; i++) {
-        for(int j = 0; j < N; j++){
 
+    for (int i = startI; i < N && total != 0; i++) {
+        for(int j = 0; j < N; j++){
+            if(flag){
+                j = startJ;
+                flag = 0;
+            }
             if ((*temp)[(i*N)+j] == '3') { //1)A burning cell turns into an empty cell
                 retMatrix[(i*N)+j] = '2';
             }
