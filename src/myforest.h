@@ -143,7 +143,10 @@ char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total)
     } else {
         start = sendCount[prec];
     }
-
+    /*
+     * 1) Calcolare il modulo N di start ed assegnare ad i e J , i = (start / N)  j = (start % N)
+     * 2) Utilizzo un flag per effettuare quest'operazione solo alla prima iterazione su J
+     */
     for (int i = 0; i < N && total != 0; i++) {
         for(int j = 0; j < N; j++){
 
