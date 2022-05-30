@@ -93,6 +93,7 @@ int main(int argc, char *argv[]){
             printf("\n");
         }*/
     }
+    //Modificare displacement
     MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
     if(my_rank == 0){
         print_forest(forest);

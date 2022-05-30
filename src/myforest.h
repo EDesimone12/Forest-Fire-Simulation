@@ -7,6 +7,11 @@
 #define N 10   //Matrix Dimension
 #define F 100 //10    //Ignite probability F(Fire)
 #define P 100 //70       //New Tree probability
+
+#define TREE "🌲"
+#define BURNING_TREE "🔥"
+#define EMPTY "🚫"
+
 // 1(TREE) 2(EMPTY) 3(BURNING TREE)
 
 void generation(char matrix[N][N]){
@@ -35,14 +40,27 @@ void generationDeterministic(char matrix[N][N]){
 }
 
 void print_forest(char f[N][N]){
+    FILE *fp = fopen("master_matrix.txt","w+a");
+
+    fprintf(fp,"--------------------\\/\\/------------------------------\n");
     printf("--------------------\\/\\/------------------------------\n");
     for(int i=0; i < N; i++){
+        fprintf(fp,"--------------------------------------------------\n");
         printf("--------------------------------------------------\n");
         for(int j=0; j < N; j++){
+            if(f[i][j] == '1'){
+                fprintf(fp,"| %s |",TREE);
+            }else if(f[i][j] == '2'){
+                fprintf(fp,"| %s |",EMPTY);
+            }else if(f[i][j] == '3'){
+                fprintf(fp,"| %s |",BURNING_TREE);
+            }
             printf("| %c |",f[i][j]);
         }
+        fprintf(fp,"\n");
         printf("\n");
     }
+    fprintf(fp,"--------------------------------------------------\n");
     printf("--------------------------------------------------\n");
 }
 
@@ -263,6 +281,6 @@ char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total)
             total--;
         }
     }
-    print_forest_array(retMatrix,rank);
+    //print_forest_array(retMatrix,rank);
     return retMatrix;
 }
