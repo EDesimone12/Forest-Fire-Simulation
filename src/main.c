@@ -10,7 +10,8 @@ int main(int argc, char *argv[]){
     int size_p; //Max P number
     int prec; //Processo precednte
     int dest; //Processo successivo
-    char forest[N][N];
+    char forest[N][N]; //Starter Forest Matrix
+    char* sendBuff; //Temp Updated Matrix
 
     srand(42);//Random Seed
     //generation(forest);
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]){
 
         int total = 0;
         char* tempMatrix = prepareForCheck(preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
-        char* sendBuff = check(&tempMatrix,sendCount,my_rank,prec,dest,total);
+        sendBuff = check(&tempMatrix,sendCount,my_rank,prec,dest,total);
 
         //printf("Total = %d  Myrank = %d\n",total,my_rank);
 
@@ -92,6 +93,11 @@ int main(int argc, char *argv[]){
             printf("\n");
         }*/
     }
+    MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+    if(my_rank == 0){
+        print_forest(forest);
+    }
+
 
     MPI_Finalize();
     

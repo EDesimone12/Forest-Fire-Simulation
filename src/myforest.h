@@ -35,6 +35,7 @@ void generationDeterministic(char matrix[N][N]){
 }
 
 void print_forest(char f[N][N]){
+    printf("--------------------\\/\\/------------------------------\n");
     for(int i=0; i < N; i++){
         printf("--------------------------------------------------\n");
         for(int j=0; j < N; j++){
