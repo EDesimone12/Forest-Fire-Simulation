@@ -5,21 +5,27 @@
 
 #define TAG 42
 #define N 10   //Matrix Dimension
-#define F 10    //Ignite probability F(Fire)
-#define P 70       //New Tree probability 
+#define F 100 //10    //Ignite probability F(Fire)
+#define P 100 //70       //New Tree probability
 // 1(TREE) 2(EMPTY) 3(BURNING TREE)
 
 void generation(char matrix[N][N]){
-    /*matrix = (char **)malloc(N*sizeof(char *)); //Array of pointer
-    matrix[0] = (char *)malloc(N*N*sizeof(char)); //Matrix
-
-    for(int i=1; i < N; i++)
-        matrix[i] = matrix[0] + i*N; */
-
     srand(42);
     for(int i=0; i < N; i++){
         for(int j =0; j < N; j++){
             if((rand() %101) <= P){
+                matrix[i][j] = '1';
+            }else{
+                matrix[i][j] = '2';
+            }
+        }
+    }
+}
+
+void generationDeterministic(char matrix[N][N]){
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            if((i % 2) == 0){
                 matrix[i][j] = '1';
             }else{
                 matrix[i][j] = '2';

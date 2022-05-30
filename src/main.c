@@ -13,8 +13,8 @@ int main(int argc, char *argv[]){
     char forest[N][N];
 
     srand(42);//Random Seed
-    generation(forest);
-
+    //generation(forest);
+    generationDeterministic(forest);
 
     MPI_Init(&argc,&argv);
     MPI_Comm_rank (MPI_COMM_WORLD,&my_rank);
