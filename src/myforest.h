@@ -44,22 +44,22 @@ void print_forest(int N, char **matrix){
     fprintf(fp,"--------------------\\/\\/------------------------------\n");
     printf("--------------------\\/\\/------------------------------\n");
     for(int i=0; i < N; i++){
-        fprintf(fp,"--------------------------------------------------\n");
+        //fprintf(fp,"--------------------------------------------------\n");
         printf("--------------------------------------------------\n");
         for(int j=0; j < N; j++){
             if(matrix[i][j] == '1'){
-                fprintf(fp,"| %s |",TREE);
+        //        fprintf(fp,"| %s |",TREE);
             }else if(matrix[i][j] == '2'){
-                fprintf(fp,"| %s |",EMPTY);
+          //      fprintf(fp,"| %s |",EMPTY);
             }else if(matrix[i][j] == '3'){
-                fprintf(fp,"| %s |",BURNING_TREE);
+            //    fprintf(fp,"| %s |",BURNING_TREE);
             }
             printf("| %c |",matrix[i][j]);
         }
-        fprintf(fp,"\n");
+        //fprintf(fp,"\n");
         printf("\n");
     }
-    fprintf(fp,"--------------------------------------------------\n");
+    //fprintf(fp,"--------------------------------------------------\n");
     printf("--------------------------------------------------\n");
 }
 
@@ -279,6 +279,6 @@ char* check(int N, char** temp, int* sendCount, int rank,int prec, int dest, int
             total--;
         }
     }
-    print_forest_array(N,retMatrix,rank);
+    //print_forest_array(N,retMatrix,rank);
     return retMatrix;
 }

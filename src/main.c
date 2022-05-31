@@ -57,7 +57,7 @@ int main(int argc, char *argv[]){
 
     if(my_rank == 0){
         //Stampo la matrice
-        print_forest(N,forest);
+        //print_forest(N,forest);
     }
     if(my_rank != 0){
         precDest(my_rank,size_p,&prec,&dest);
@@ -123,7 +123,13 @@ int main(int argc, char *argv[]){
     }
 
     if(my_rank == 0){
-        print_forest(N,forest);
+        char **pippo; //Starter Forest Matrix
+        pippo = (char **)malloc(N*sizeof(char *)); //Array of pointer
+        pippo[0] = (char *)malloc(N*N*sizeof(char)); //Matrix
+        for(int i=1; i < N; i++)
+            pippo[i] = pippo[0] + i*N;
+
+        print_forest(N,pippo);
     }
     
     MPI_Finalize();
