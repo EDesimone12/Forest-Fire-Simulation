@@ -4,7 +4,6 @@
 #include <wchar.h>
 
 #define TAG 42
-#define N 10   //Matrix Dimension
 #define F 100 //10    //Ignite probability F(Fire)
 #define P 100 //70       //New Tree probability
 
@@ -14,7 +13,7 @@
 
 // 1(TREE) 2(EMPTY) 3(BURNING TREE)
 
-void generation(char matrix[N][N]){
+void generation(int N, char **matrix){
     srand(42);
     for(int i=0; i < N; i++){
         for(int j =0; j < N; j++){
@@ -27,7 +26,7 @@ void generation(char matrix[N][N]){
     }
 }
 
-void generationDeterministic(char matrix[N][N]){
+void generationDeterministic(int N, char **matrix){
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             if((i % 2) == 0){
@@ -39,7 +38,7 @@ void generationDeterministic(char matrix[N][N]){
     }
 }
 
-void print_forest(char f[N][N]){
+void print_forest(int N, char **matrix){
     FILE *fp = fopen("master_matrix.txt","w+a");
 
     fprintf(fp,"--------------------\\/\\/------------------------------\n");
@@ -48,14 +47,14 @@ void print_forest(char f[N][N]){
         fprintf(fp,"--------------------------------------------------\n");
         printf("--------------------------------------------------\n");
         for(int j=0; j < N; j++){
-            if(f[i][j] == '1'){
+            if(matrix[i][j] == '1'){
                 fprintf(fp,"| %s |",TREE);
-            }else if(f[i][j] == '2'){
+            }else if(matrix[i][j] == '2'){
                 fprintf(fp,"| %s |",EMPTY);
-            }else if(f[i][j] == '3'){
+            }else if(matrix[i][j] == '3'){
                 fprintf(fp,"| %s |",BURNING_TREE);
             }
-            printf("| %c |",f[i][j]);
+            printf("| %c |",matrix[i][j]);
         }
         fprintf(fp,"\n");
         printf("\n");
@@ -64,7 +63,7 @@ void print_forest(char f[N][N]){
     printf("--------------------------------------------------\n");
 }
 
-void print_forest_array(char * temp,int rank){
+void print_forest_array(int N, char * temp,int rank){
     char *fileName = (char*) malloc(sizeof(char)*25); //Dim of the fileName string
 
     FILE *fp;
@@ -101,7 +100,7 @@ void precDest (int my_rank, int size_p, int *prec , int* dest){
     //printf("Sono %d , pre: %d  dest:%d \n",my_rank,*prec,*dest);
 }
 
-void divWork(int size,int** sendCount, int** displacement){
+void divWork(int N, int size,int** sendCount, int** displacement){
     //printf("Inizio divisione...\n");
     int divVal = (N*N) / (size-1);
     int restVal = (N*N) % (size-1);
@@ -125,7 +124,7 @@ void divWork(int size,int** sendCount, int** displacement){
     //printf("Fine divisione...\n");
 }
 
-char* prepareForCheck(char* preNeighbor,char* recvBuff,char* destNeighbor,int* sendCount,int my_rank,int prec, int dest,int* total){
+char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor,int* sendCount,int my_rank,int prec, int dest,int* total){
         char *arr = malloc(sizeof *arr * N * N);
         if(prec != -10){
             memcpy(arr,preNeighbor,sendCount[prec]);
@@ -156,7 +155,7 @@ char* prepareForCheck(char* preNeighbor,char* recvBuff,char* destNeighbor,int* s
         return arr;
 }
 
-char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total) {
+char* check(int N, char** temp, int* sendCount, int rank,int prec, int dest, int total) {
     int startI = 0;
     int startJ = 0;
     int flag = 1;
@@ -281,6 +280,6 @@ char* check(char** temp, int* sendCount, int rank,int prec, int dest, int total)
             total--;
         }
     }
-    //print_forest_array(retMatrix,rank);
+    print_forest_array(N,retMatrix,rank);
     return retMatrix;
 }

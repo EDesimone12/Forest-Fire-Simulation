@@ -10,14 +10,36 @@ int main(int argc, char *argv[]){
     int size_p; //Max P number
     int prec; //Processo precednte
     int dest; //Processo successivo
-    char forest[N][N]; //Starter Forest Matrix
+    int N = 0; // Row and Column Dimension
     char* sendBuff; //Temp Updated Matrix
 
-    srand(42);//Random Seed
-    //generation(forest);
-    generationDeterministic(forest);
-
     MPI_Init(&argc,&argv);
+
+    if(argc < 3){ //0 = FILENAME - 1 = N - 2 = ITERAZIONI
+        printf("Errore parametri mancanti!\n");
+        MPI_Finalize();
+        exit(0);
+    }
+    N = atoi(argv[1]);
+
+    if(N == 0){//Not a good value for N
+        MPI_Finalize();
+        exit(0);
+    }
+
+    char **forest; //Starter Forest Matrix
+    forest = (char **)malloc(N*sizeof(char *)); //Array of pointer
+    forest[0] = (char *)malloc(N*N*sizeof(char)); //Matrix
+    for(int i=1; i < N; i++)
+        forest[i] = forest[0] + i*N;
+
+    if(my_rank == 0){
+        srand(42);//Random Seed
+        //generation(N,forest);
+        generationDeterministic(N,forest);
+    }
+
+
     MPI_Comm_rank (MPI_COMM_WORLD,&my_rank);
     MPI_Comm_size(MPI_COMM_WORLD,&size_p);
 
@@ -35,12 +57,12 @@ int main(int argc, char *argv[]){
 
     if(my_rank == 0){
         //Stampo la matrice
-        print_forest(forest);
+        print_forest(N,forest);
     }
     if(my_rank != 0){
         precDest(my_rank,size_p,&prec,&dest);
     }
-    divWork(size_p,&sendCount,&displacement);
+    divWork(N,size_p,&sendCount,&displacement);
     char recvBuff[100];
 
     MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
@@ -72,8 +94,8 @@ int main(int argc, char *argv[]){
         MPI_Wait(&req2,&Stat2);
 
         int total = 0;
-        char* tempMatrix = prepareForCheck(preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
-        sendBuff = check(&tempMatrix,sendCount,my_rank,prec,dest,total);
+        char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
+        sendBuff = check(N, &tempMatrix,sendCount,my_rank,prec,dest,total);
 
         //printf("Total = %d  Myrank = %d\n",total,my_rank);
 
@@ -101,7 +123,7 @@ int main(int argc, char *argv[]){
     }
 
     if(my_rank == 0){
-        print_forest(forest);
+        //print_forest(N,forest);
     }
     
     MPI_Finalize();
