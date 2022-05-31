@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
     }
 
     if(my_rank == 0){
-        //print_forest(N,forest);
+        print_forest(N,forest);
     }
     
     MPI_Finalize();

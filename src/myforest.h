@@ -65,7 +65,6 @@ void print_forest(int N, char **matrix){
 
 void print_forest_array(int N, char * temp,int rank){
     char *fileName = (char*) malloc(sizeof(char)*25); //Dim of the fileName string
-
     FILE *fp;
     sprintf(fileName,"output_check_%d.txt",rank);
 
