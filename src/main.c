@@ -14,6 +14,8 @@ int main(int argc, char *argv[]){
     char* sendBuff; //Temp Updated Matrix
 
     MPI_Init(&argc,&argv);
+    MPI_Comm_rank (MPI_COMM_WORLD,&my_rank);
+    MPI_Comm_size(MPI_COMM_WORLD,&size_p);
 
     if(argc < 3){ //0 = FILENAME - 1 = N - 2 = ITERAZIONI
         printf("Errore parametri mancanti!\n");
@@ -27,21 +29,14 @@ int main(int argc, char *argv[]){
         exit(0);
     }
 
-    char **forest; //Starter Forest Matrix
-    forest = (char **)malloc(N*sizeof(char *)); //Array of pointer
-    forest[0] = (char *)malloc(N*N*sizeof(char)); //Matrix
-    for(int i=1; i < N; i++)
-        forest[i] = forest[0] + i*N;
+    char *forest = malloc(sizeof *forest * N * N); //Starter Forest Matrix
 
     if(my_rank == 0){
         srand(42);//Random Seed
         //generation(N,forest);
-        generationDeterministic(N,forest);
+        generationDeterministic(N,&forest);
     }
 
-
-    MPI_Comm_rank (MPI_COMM_WORLD,&my_rank);
-    MPI_Comm_size(MPI_COMM_WORLD,&size_p);
 
     MPI_Request req = MPI_REQUEST_NULL; //Send
     MPI_Request req1 = MPI_REQUEST_NULL; //Recv pre
@@ -57,15 +52,25 @@ int main(int argc, char *argv[]){
 
     if(my_rank == 0){
         //Stampo la matrice
-        //print_forest(N,forest);
+        print_forest(N,forest);
     }
     if(my_rank != 0){
         precDest(my_rank,size_p,&prec,&dest);
     }
+
     divWork(N,size_p,&sendCount,&displacement);
-    char recvBuff[100];
+    char *recvBuff = (char*) malloc(sendCount[my_rank]*sizeof(char));
 
     MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
+
+    /*if(my_rank == 1){
+        for(int i = 0; i < size_p; i++){
+            printf(" i:%d  Displ %d send %d \n", i,displacement[i], sendCount[i]);
+            printf("| %c |",recvBuff[i]);
+        }
+        printf("\n");
+    }*/
+
 
     if( my_rank != 0){
 
@@ -97,11 +102,12 @@ int main(int argc, char *argv[]){
         char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
         sendBuff = check(N, tempMatrix,sendCount,my_rank,prec,dest,total);
 
-        //print_forest_array(N,sendBuff,my_rank);
-
         //printf("Total = %d  Myrank = %d\n",total,my_rank);
 
-        /* Stampa precedenti e successivi per ogni processo
+         //Stampa precedenti e successivi per ogni processo
+         /*if(my_rank == 2){
+
+
         if(prec != -10){
             printf("Sono %d - PRE\n",my_rank);
             for(int i = 0; i < sendCount[prec]; i++){
@@ -115,7 +121,8 @@ int main(int argc, char *argv[]){
                 printf("%c ",destNeighbor[i]);
             }
             printf("\n");
-        }*/
+        }
+         }*/
     }
     //Modificare displacement
     if(prec == -10){
@@ -125,13 +132,7 @@ int main(int argc, char *argv[]){
     }
 
     if(my_rank == 0){
-        char **pippo; //Starter Forest Matrix
-        pippo = (char **)malloc(N*sizeof(char *)); //Array of pointer
-        pippo[0] = (char *)malloc(N*N*sizeof(char)); //Matrix
-        for(int i=1; i < N; i++)
-            pippo[i] = pippo[0] + i*N;
-
-        //print_forest(N,pippo);
+        print_forest(N,forest);
     }
     
     MPI_Finalize();
