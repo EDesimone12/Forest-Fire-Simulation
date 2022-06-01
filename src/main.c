@@ -95,7 +95,9 @@ int main(int argc, char *argv[]){
 
         int total = 0;
         char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
-        sendBuff = check(N, &tempMatrix,sendCount,my_rank,prec,dest,total);
+        sendBuff = check(N, tempMatrix,sendCount,my_rank,prec,dest,total);
+
+        //print_forest_array(N,sendBuff,my_rank);
 
         //printf("Total = %d  Myrank = %d\n",total,my_rank);
 
@@ -129,7 +131,7 @@ int main(int argc, char *argv[]){
         for(int i=1; i < N; i++)
             pippo[i] = pippo[0] + i*N;
 
-        print_forest(N,pippo);
+        //print_forest(N,pippo);
     }
     
     MPI_Finalize();
