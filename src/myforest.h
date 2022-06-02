@@ -27,7 +27,6 @@ void generation(int N, char **matrix){
 }
 
 void generationDeterministic(int N, char **matrix){
-    printf("-----------\n");
     for(int i = 0; i < N; i++){
         for(int j = 0; j < N; j++){
             if((i % 3) == 0){
@@ -40,12 +39,32 @@ void generationDeterministic(int N, char **matrix){
         }
     }
 }
+/**
+ *
+ * @param N Matrix dimension
+ * @param matrix Forest Matrix
+ * @return 0 if matrix is empty 1 otherwise
+ */
+int isEmpty(int N, char *matrix){
+    int flag = 0;
+    for(int i = 0; i < N; i++){
+        for( int j = 0; j < N; j++){
+            if(matrix[(i*N)+j] != '2'){
+                flag = 1;
+                //printf("Matrice ok\n");
+                return flag;
+            }
+        }
+    }
+    //printf("Foresta bruciata\n");
+    return flag;
+}
 
-void print_forest(int N, char *matrix){
+void print_forest(int N, char *matrix, int I){
     FILE *fp = fopen("master_matrix.txt","w+a");
 
-    fprintf(fp,"--------------------\\/\\/------------------------------\n");
-    printf("--------------------\\/\\/------------------------------\n");
+    fprintf(fp,"--------------------\\DAY %d/------------------------------\n",I);
+    printf("--------------------\\DAY %d/------------------------------\n",I);
     for(int i=0; i < N; i++){
         fprintf(fp,"--------------------------------------------------\n");
         printf("--------------------------------------------------\n");
