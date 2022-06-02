@@ -158,18 +158,18 @@ char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor
                 memcpy(arr+sendCount[prec]+sendCount[my_rank],destNeighbor, sendCount[dest]);
                 *total += sendCount[dest];
             }
+            printf("fine then\n");
         }else{
             memcpy(arr, recvBuff, sendCount[my_rank]);
             *total += sendCount[my_rank];
             //printf("sotto - rank= %d - sendCount[my_rank] %d - sendCount[dest] = %d  dest= %d  prec = %d\n",my_rank,sendCount[my_rank],sendCount[dest],dest,prec);
             memcpy(arr+sendCount[my_rank],destNeighbor,sendCount[dest]);
             *total += sendCount[dest];
+            printf("fine else\n");
         }
+        printf("arr: %s\n",arr);
          //Stampa per verifica della creazione dela matrice temporanea
-
          /*if(my_rank == 1){
-
-
         int count = 0;
         for(int i = 0; i < N; i++){
             printf("--------------------------------------------------\n");
@@ -181,6 +181,7 @@ char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor
         }
         printf("--------------------------------------------------\n");
          }*/
+         printf("finiscooo");
         return arr;
 }
 
