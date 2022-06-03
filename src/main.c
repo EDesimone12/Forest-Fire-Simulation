@@ -79,9 +79,9 @@ int main(int argc, char *argv[]){
 
 
         if( my_rank != 0){
-
-            char* preNeighbor = (char*) malloc(sendCount[prec]*sizeof(char));
-            char* destNeighbor = (char*) malloc(sendCount[dest]*sizeof(char));
+            printf("prec %d dest %d\n",prec,dest);
+            char* preNeighbor = (char*) malloc(sendCount[prec] *sizeof(char));
+            char* destNeighbor = (char*) malloc(sendCount[dest] *sizeof(char));
 
             if(prec != -10){
                 //Ricevo dal precedente
@@ -106,9 +106,7 @@ int main(int argc, char *argv[]){
 
             int total = 0;
             char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
-            printf("Post prepare , sono %d",my_rank);
             sendBuff = check(N, tempMatrix,sendCount,my_rank,prec,dest,total);
-            printf("Post check , sono %d",my_rank);
 
             //printf("Total = %d  Myrank = %d\n",total,my_rank);
 
@@ -132,12 +130,19 @@ int main(int argc, char *argv[]){
            }
             }*/
         }
-        //Modificare displacement
+        char* gatherBuff;
         if(prec == -10){
+            gatherBuff = sendBuff;
+        }else{
+            gatherBuff = (sendBuff+sendCount[prec]);
+        }
+
+        /*if(my_rank == 0){
             MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
         }else{
-            MPI_Gatherv((sendBuff+sendCount[prec]),sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
-        }
+            MPI_Gatherv(gatherBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+        }*/
+        MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 
         if(my_rank == 0){
             //print_forest(N,forest,index);

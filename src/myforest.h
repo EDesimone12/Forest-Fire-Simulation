@@ -146,7 +146,14 @@ void divWork(int N, int size,int** sendCount, int** displacement){
 }
 
 char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor,int* sendCount,int my_rank,int prec, int dest,int* total){
-        char *arr = malloc(sizeof *arr * N * N);
+        char *arr;
+        if(prec == -10){
+            arr = malloc(sizeof *arr * (sendCount[my_rank] + sendCount[dest]));
+        }else if(dest == -10){
+            arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank]));
+        }else{
+            arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank] + sendCount[dest]));
+        }
 
         if(prec != -10){
             memcpy(arr,preNeighbor,sendCount[prec]);
@@ -158,16 +165,13 @@ char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor
                 memcpy(arr+sendCount[prec]+sendCount[my_rank],destNeighbor, sendCount[dest]);
                 *total += sendCount[dest];
             }
-            printf("fine then\n");
         }else{
             memcpy(arr, recvBuff, sendCount[my_rank]);
             *total += sendCount[my_rank];
             //printf("sotto - rank= %d - sendCount[my_rank] %d - sendCount[dest] = %d  dest= %d  prec = %d\n",my_rank,sendCount[my_rank],sendCount[dest],dest,prec);
             memcpy(arr+sendCount[my_rank],destNeighbor,sendCount[dest]);
             *total += sendCount[dest];
-            printf("fine else\n");
         }
-        printf("arr: %s\n",arr);
          //Stampa per verifica della creazione dela matrice temporanea
          /*if(my_rank == 1){
         int count = 0;
@@ -181,7 +185,6 @@ char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor
         }
         printf("--------------------------------------------------\n");
          }*/
-         printf("finiscooo");
         return arr;
 }
 
