@@ -336,5 +336,9 @@ char* check(int N, char* temp, int* sendCount, int rank,int prec, int dest, int 
         }
     }
     //print_forest_array(N,retMatrix,rank);
-    return retMatrix;
+    if(prec == -10){
+        return retMatrix;
+    }else{
+        return (retMatrix+sendCount[prec]);
+    }
 }

@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD,&size_p);
 
     if(argc < 3){ //0 = FILENAME - 1 = N - 2 = ITERAZIONI
-        printf("Errore parametri mancanti!\n");
+        fprintf( stderr, "Errore parametri mancanti !\n");
         MPI_Finalize();
         exit(0);
     }
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]){
     I = atoi(argv[2]);
 
     if(!N || !I){ //Bad values for N & I
-        printf("Errore valore parametri !\n");
+        fprintf( stderr, "Errore valore parametri !\n");
         MPI_Finalize();
         exit(0);
     }
@@ -79,7 +79,6 @@ int main(int argc, char *argv[]){
 
 
         if( my_rank != 0){
-            printf("prec %d dest %d\n",prec,dest);
             char* preNeighbor = (char*) malloc(sendCount[prec] *sizeof(char));
             char* destNeighbor = (char*) malloc(sendCount[dest] *sizeof(char));
 
@@ -130,18 +129,7 @@ int main(int argc, char *argv[]){
            }
             }*/
         }
-        char* gatherBuff;
-        if(prec == -10){
-            gatherBuff = sendBuff;
-        }else{
-            gatherBuff = (sendBuff+sendCount[prec]);
-        }
 
-        /*if(my_rank == 0){
-            MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
-        }else{
-            MPI_Gatherv(gatherBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
-        }*/
         MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 
         if(my_rank == 0){
