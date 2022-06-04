@@ -127,22 +127,43 @@ void divWork(int N, int size,int** sendCount, int** displacement){
     int restVal = (N*N) % (size-1);
 
     int pos = 0;
-    displacement[0][0] = 0;
-    sendCount[0][0] = 0; //Al processo master non dò nulla da fare.
+    (*displacement)[0] = 0;
+    (*sendCount)[0] = 0; //Al processo master non dò nulla da fare.
 
     for(int i = 1; i < size;i++){
-        sendCount[0][i] = divVal;
+        (*sendCount)[i] = divVal;
         if(restVal > 0){
-            sendCount[0][i]++;
+            (*sendCount)[i]++;
             restVal--;
         }
         //Calcolo il displacement per la scatterv
-        displacement[0][i] = pos;
-        pos = pos + sendCount[0][i];
+        (*displacement)[i] = pos;
+        pos = pos + (*sendCount)[i];
         //printf("Displ[%d]:%d \n",i,displacement[0][i]);
         //printf("SendCount[%d]: %d \n ",i,sendCount[0][i]);
     }
     //printf("Fine divisione...\n");
+}
+void divWork2(int N, int size, int** sendCount, int** displacement){
+    int numberOfRow = N / (size - 1);
+    int restVal = N % (size - 1);
+
+    int pos = 0;
+    (*displacement)[0] = 0;
+    (*sendCount)[0] = 0; //Al processo master non dò nulla da fare.
+
+    for(int i = 1; i < size;i++){
+        (*sendCount)[i] = (numberOfRow*N);
+        if(restVal > 0){
+            (*sendCount)[i] += N;
+            restVal--;
+        }
+        //Calcolo il displacement per la scatterv
+        (*displacement)[i] = pos;
+        pos = pos + (*sendCount)[i];
+        //printf("Displ[%d]:%d \n",i,displacement[0][i]);
+        //printf("SendCount[%d]: %d \n ",i,sendCount[0][i]);
+    }
 }
 
 char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor,int* sendCount,int my_rank,int prec, int dest,int* total){

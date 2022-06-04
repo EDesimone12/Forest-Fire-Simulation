@@ -54,6 +54,7 @@ int main(int argc, char *argv[]){
     
 
     for(int index = 0; index < I && isEmpty(N,forest); index++){
+
         if(my_rank == 0){
             //Stampo la matrice
             print_forest(N,forest,index);
@@ -131,7 +132,7 @@ int main(int argc, char *argv[]){
         MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 
         if(my_rank == 0){
-            //print_forest(N,forest,index);
+            print_forest(N,forest,index);
         }
         //free(recvBuff);
     MPI_Barrier(MPI_COMM_WORLD);
