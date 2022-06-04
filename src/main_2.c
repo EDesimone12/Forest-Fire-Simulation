@@ -18,19 +18,30 @@ int main(int argc, char *argv[]){
     MPI_Comm_rank (MPI_COMM_WORLD,&my_rank);
     MPI_Comm_size(MPI_COMM_WORLD,&size_p);
 
-    if(argc < 3){ //0 = FILENAME - 1 = N - 2 = ITERAZIONI
-        fprintf( stderr, "Errore parametri mancanti !\n");
-        MPI_Finalize();
-        exit(0);
+    if(my_rank == 0) {
+        if (argc < 3) { //0 = FILENAME - 1 = N - 2 = ITERAZIONI
+            fprintf(stderr, "Errore parametri mancanti !\n");
+            MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+            exit(0);
+        }
     }
     N = atoi(argv[1]);
     I = atoi(argv[2]);
 
-    if(!N || !I){ //Bad values for N & I
-        fprintf( stderr, "Errore valore parametri !\n");
-        MPI_Finalize();
-        exit(0);
+    if(my_rank == 0){
+        if(!N || !I){ //Bad values for N & I
+            fprintf( stderr, "Errore valore parametri !\n");
+            MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
+            exit(0);
+        }
+
+        if( N < (size_p-1)){ //Bad values for N & I
+            fprintf( stderr, "Numero di righe non sufficiente !\n");
+            MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
+            exit(0);
+        }
     }
+
 
 
     char *forest = malloc(sizeof *forest * N * N); //Starter Forest Matrix
@@ -57,7 +68,7 @@ int main(int argc, char *argv[]){
 
         if(my_rank == 0){
             //Stampo la matrice
-            print_forest(N,forest,index);
+            //print_forest(N,forest,index);
         }
         if(my_rank != 0){
             precDest(my_rank,size_p,&prec,&dest);

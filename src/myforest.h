@@ -61,7 +61,9 @@ int isEmpty(int N, char *matrix){
 }
 
 void print_forest(int N, char *matrix, int I){
-    FILE *fp = fopen("master_matrix.txt","w+a");
+    char *fileName = (char*) malloc(sizeof(char)*25); //Dim of the fileName string
+    sprintf(fileName,"master_matrix_day_%d.txt",I);
+    FILE *fp = fopen(fileName,"a");
 
     fprintf(fp,"--------------------\\DAY %d/------------------------------\n",I);
     printf("--------------------\\DAY %d/------------------------------\n",I);
@@ -144,6 +146,7 @@ void divWork(int N, int size,int** sendCount, int** displacement){
     }
     //printf("Fine divisione...\n");
 }
+
 void divWork2(int N, int size, int** sendCount, int** displacement){
     int numberOfRow = N / (size - 1);
     int restVal = N % (size - 1);
