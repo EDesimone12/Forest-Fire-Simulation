@@ -174,6 +174,7 @@ void divWork2(int N, int size, int** sendCount, int** displacement){
 
 char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor,int* sendCount,int my_rank,int prec, int dest,int* total){
         char *arr;
+        printf("dentro prepare rank: %d\n",my_rank);
         if(prec == -10){
             arr = malloc(sizeof *arr * (sendCount[my_rank] + sendCount[dest]));
         }else if(dest == -10){
@@ -181,6 +182,7 @@ char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor
         }else{
             arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank] + sendCount[dest]));
         }
+        printf("prepare post malloc rank: %d\n",my_rank);
 
         if(prec != -10){
             memcpy(arr,preNeighbor,sendCount[prec]);

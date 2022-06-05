@@ -120,15 +120,18 @@ int main(int argc, char *argv[]){
             int total = 0;
             char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
             sendBuff = check(N, tempMatrix,sendCount,my_rank,prec,dest,total);
+            printf("adf rank: %d\n",my_rank);
 
+            free(tempMatrix);
         }
-
+        printf("Pre gatherv rank: %d\n",my_rank);
         MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
-
+        printf("Post gatherv rank: %d\n",my_rank);
         if(my_rank == 0){
             //print_forest(N,forest,index);
         }
         free(recvBuff);
+        free(sendBuff);
 
     }
     if(!isEmpty(N,forest,my_rank)){
