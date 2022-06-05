@@ -13,10 +13,14 @@ int main(int argc, char *argv[]){
     int N = 0; // Row and Column Dimension
     int I = 0; //Iteration number
     char* sendBuff; //Temp Updated Matrix
+    float start = 0; //Starting time
+    float end = 0; //Finish time
 
     MPI_Init(&argc,&argv);
     MPI_Comm_rank (MPI_COMM_WORLD,&my_rank);
     MPI_Comm_size(MPI_COMM_WORLD,&size_p);
+    MPI_Barrier(MPI_COMM_WORLD); /* tutti i processi sono inizializzati */
+    start = MPI_Wtime();
 
     if(my_rank == 0) {
         if (argc < 3) { //0 = FILENAME - 1 = N - 2 = ITERAZIONI
@@ -117,27 +121,6 @@ int main(int argc, char *argv[]){
             char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
             sendBuff = check(N, tempMatrix,sendCount,my_rank,prec,dest,total);
 
-            //printf("Total = %d  Myrank = %d\n",total,my_rank);
-
-            //Stampa precedenti e successivi per ogni processo
-            /*if(my_rank == 2){
-
-
-           if(prec != -10){
-               printf("Sono %d - PRE\n",my_rank);
-               for(int i = 0; i < sendCount[prec]; i++){
-                   printf("%c ",preNeighbor[i]);
-               }
-               printf("\n");
-           }
-           if(dest != -10){
-               printf("Sono %d - DEST\n",my_rank);
-               for(int i = 0; i < sendCount[dest]; i++){
-                   printf("%c ",destNeighbor[i]);
-               }
-               printf("\n");
-           }
-            }*/
         }
 
         MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
@@ -156,5 +139,11 @@ int main(int argc, char *argv[]){
     //free(sendBuff);
     free(sendCount);
     free(displacement);
+
+    MPI_Barrier(MPI_COMM_WORLD); /* tutti i processi hanno terminato */
+    end = MPI_Wtime();
     MPI_Finalize();
+    if (my_rank == 0) { /* Master node scrive su stdout il tempo o su file */
+        printf("Time in ms = %f\n", end-start);
+    }
 }
