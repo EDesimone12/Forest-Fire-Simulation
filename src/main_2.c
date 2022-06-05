@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
     I = atoi(argv[2]);
 
     if(my_rank == 0){
-        if(!N || !I){ //Bad values for N & I
+        if(!N || N < 2 || !I ){ //Bad values for N & I
             fprintf( stderr, "Errore valore parametri !\n");
             MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
             exit(0);
