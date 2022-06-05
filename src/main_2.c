@@ -136,7 +136,6 @@ int main(int argc, char *argv[]){
     }
 
     free(forest);
-    //free(sendBuff);
     free(sendCount);
     free(displacement);
 
