@@ -48,8 +48,8 @@ int main(int argc, char *argv[]){
 
     if(my_rank == 0){
         srand(42);//Random Seed
-        //generation(N,forest);
-        generationDeterministic(N,&forest);
+        generation(N,&forest);
+        //generationDeterministic(N,&forest);
     }
 
 
@@ -64,11 +64,11 @@ int main(int argc, char *argv[]){
     int* displacement = malloc(size_p * sizeof(int));
     
 
-    for(int index = 0; index < I && isEmpty(N,forest); index++){
+    for(int index = 0; index < I && isEmpty(N,forest,my_rank); index++){
 
         if(my_rank == 0){
             //Stampo la matrice
-            //print_forest(N,forest,index);
+            print_forest(N,forest,index);
         }
         if(my_rank != 0){
             precDest(my_rank,size_p,&prec,&dest);
@@ -143,10 +143,13 @@ int main(int argc, char *argv[]){
         MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 
         if(my_rank == 0){
-            print_forest(N,forest,index);
+            //print_forest(N,forest,index);
         }
         //free(recvBuff);
-    MPI_Barrier(MPI_COMM_WORLD);
+
+    }
+    if(!isEmpty(N,forest,my_rank)){
+        MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
     }
 
     //free(forest);
