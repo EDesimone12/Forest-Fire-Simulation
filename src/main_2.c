@@ -122,6 +122,8 @@ int main(int argc, char *argv[]){
             sendBuff = check(N, tempMatrix,sendCount,my_rank,prec,dest,total);
             printf("adf rank: %d\n",my_rank);
 
+            free(preNeighbor);
+            free(destNeighbor);
             free(tempMatrix);
         }
         printf("Pre gatherv rank: %d\n",my_rank);
@@ -131,7 +133,7 @@ int main(int argc, char *argv[]){
             //print_forest(N,forest,index);
         }
         free(recvBuff);
-        free(sendBuff);
+        //free(sendBuff);
 
     }
     if(!isEmpty(N,forest,my_rank)){
