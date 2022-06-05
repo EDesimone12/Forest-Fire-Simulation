@@ -145,16 +145,16 @@ int main(int argc, char *argv[]){
         if(my_rank == 0){
             //print_forest(N,forest,index);
         }
-        //free(recvBuff);
+        free(recvBuff);
 
     }
     if(!isEmpty(N,forest,my_rank)){
         MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
     }
 
-    //free(forest);
+    free(forest);
     //free(sendBuff);
-    //free(sendCount);
-    //free(displacement);
+    free(sendCount);
+    free(displacement);
     MPI_Finalize();
 }
