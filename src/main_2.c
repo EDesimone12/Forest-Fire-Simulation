@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
 
         if(my_rank == 0){
             //Stampo la matrice
-            print_forest(N,forest,index);
+            //print_forest(N,forest,index);
         }
         if(my_rank != 0){
             precDest(my_rank,size_p,&prec,&dest);
