@@ -70,7 +70,7 @@ int main(int argc, char *argv[]){
 
         if(my_rank == 0){
             //Stampo la matrice
-            print_forest(N,forest,index);
+            //print_forest(N,forest,index);
         }
         if(my_rank != 0){
             precDest(my_rank,size_p,&prec,&dest);
@@ -81,19 +81,9 @@ int main(int argc, char *argv[]){
 
         MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
 
-        /*if(my_rank == 1){
-            for(int i = 0; i < size_p; i++){
-                printf(" i:%d  Displ %d send %d \n", i,displacement[i], sendCount[i]);
-                printf("| %c |",recvBuff[i]);
-            }
-            printf("\n");
-        }*/
-
-
         if( my_rank != 0){
             char* preNeighbor = (char*) malloc(sendCount[prec] *sizeof(char));
             char* destNeighbor = (char*) malloc(sendCount[dest] *sizeof(char));
-
             if(prec != -10){
                 //Ricevo dal precedente
                 MPI_Irecv(preNeighbor,sendCount[prec],MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req1);
@@ -123,26 +113,34 @@ int main(int argc, char *argv[]){
             free(destNeighbor);
             free(tempMatrix);
         }
+
         MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+        //printf("Post gatherv, rank:%d prec:%d dest:%d\n",my_rank,prec,dest);
         if(my_rank == 0){
-            print_forest(N,forest,index);
+            //print_forest(N,forest,index);
         }
         free(recvBuff);
-        //free(sendBuff);
+
+
 
     }
+    /*if(my_rank != 0){
+        free(sendBuff);
+    }*/
+    free(forest);
+    free(sendCount);
+    free(displacement);
+
     if(!isEmpty(N,forest,my_rank)){
         MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
     }
 
-    free(forest);
-    free(sendCount);
-    free(displacement);
+
 
     MPI_Barrier(MPI_COMM_WORLD); /* tutti i processi hanno terminato */
     end = MPI_Wtime();
     MPI_Finalize();
     if (my_rank == 0) { /* Master node scrive su stdout il tempo o su file */
-        printf("Time in ms = %f\n", end-start);
+        printf("Time in s = %f\n", end-start);
     }
 }

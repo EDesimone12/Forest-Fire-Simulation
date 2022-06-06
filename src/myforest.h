@@ -167,8 +167,8 @@ void divWork2(int N, int size, int** sendCount, int** displacement){
         //Calcolo il displacement per la scatterv
         (*displacement)[i] = pos;
         pos = pos + (*sendCount)[i];
-        //printf("Displ[%d]:%d \n",i,displacement[0][i]);
-        //printf("SendCount[%d]: %d \n ",i,sendCount[0][i]);
+        //printf("Displ[%d]:%d \n",i,(*displacement)[i]);
+        //printf("SendCount[%d]: %d \n ",i,(*sendCount)[i]);
     }
 }
 
@@ -181,7 +181,6 @@ char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor
         }else{
             arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank] + sendCount[dest]));
         }
-
         if(prec != -10){
             memcpy(arr,preNeighbor,sendCount[prec]);
             *total += sendCount[prec];
@@ -199,6 +198,7 @@ char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor
             memcpy(arr+sendCount[my_rank],destNeighbor,sendCount[dest]);
             *total += sendCount[dest];
         }
+
         return arr;
 }
 
