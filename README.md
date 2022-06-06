@@ -28,8 +28,25 @@ Il modello è definito da 4 regole fondamentali:
 >
 > <img src="https://github.com/EDesimone12/Forest-Fire-Simulation/blob/main/img/Von_Neumann_neighborhood.png?raw=true" alt="Von_Neumann_neighborhood">
 
+## Configurazione Ambiente ed Esecuzione
+Per configurare l'ambiente di sviluppo è stato utilizzato un container Docker creato a partire da 
+```
+git clone https://github.com/spagnuolocarmine/docker-mpi.git
+cd docker-mpi
+docker build --no-cache -t dockermpi .
+docker run -it -t dockermpi:latest
+```
+L'ambiente effettivo di esecuzione ha comportato invece la creazione di un Cluster omogeneo formato da N macchine.
+É stato utilizzato [GCP(Google Cloud Platform)](https://cloud.google.com) per la creazione del cluster composto da 6 macchine __e2-standard-4(4 vCPU, 16GB di Memoria)__.
 
+La configurazione del cluster è stata realizzata mediante la seguente guida `https://github.com/spagnuolocarmine/ubuntu-openmpi-openmp`
 ## Soluzione Proposta
+L'algoritmo è stato implementato attraverso il Linguaggio C ed [OpenMPI](https://www.open-mpi.org/doc/), un'implementazione dello standard [MPI(Message Passing Interface)](https://it.wikipedia.org/wiki/Message_Passing_Interface#Implementazioni)
+
+L'algoritmo prende in input N ed I, rispettivamente:
+* N - Dimensione della Matrice NxN
+* I - Numero di Iterazioni dell'algoritmo sulla Foresta a meno di terminazioni anticipate
+
 ## Analisi del Codice
 ## Analisi Performance
 ## Conclusione
