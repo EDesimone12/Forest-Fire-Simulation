@@ -114,15 +114,13 @@ int main(int argc, char *argv[]){
             free(tempMatrix);
         }
 
+        printf("Pre gatherv, rank:%d prec:%d dest:%d sendCount[rank]:%d\n",my_rank,prec,dest,sendCount[my_rank]);
         MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
-        //printf("Post gatherv, rank:%d prec:%d dest:%d\n",my_rank,prec,dest);
-        if(my_rank == 0){
-            //print_forest(N,forest,index);
-        }
+
+        /*if(my_rank == 0){
+            print_forest(N,forest,index);
+        }*/
         free(recvBuff);
-
-
-
     }
     /*if(my_rank != 0){
         free(sendBuff);
