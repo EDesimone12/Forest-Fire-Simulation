@@ -48,9 +48,13 @@ L'algoritmo prende in input N ed I, rispettivamente:
 * I - Numero di Iterazioni dell'algoritmo sulla Foresta a meno di terminazioni anticipate
 
 Il processo master si occupa della generazione di una matrice NxN che rappresenta la nostra foresta, viene poì calcolato il lavoro che spetta ad ogni processo
-e gli viene inviata la porzione di matrice da analizzare. Successivamente ogni processo invia in maniera asincrona la propria porzione da analizzare ad i vicini e riceverà quindi dagli altri processi.
+e gli viene inviata la porzione di matrice da analizzare. 
+
+Successivamente ogni processo invia in maniera asincrona la propria porzione da analizzare ad i vicini e riceverà quindi dagli altri processi la loro parte.      
 Ogni processo effettua i dovuti controlli sulla porzione di matrice assegnatagli ed invia al master la porzione aggiornata.
 
+## Analisi del Codice
+Analizziamo il codice associato alla generazione della foresta.
 ```c
     //main_2.c
     
@@ -133,7 +137,82 @@ void divWork2(int N, int size, int** sendCount, int** displacement){
     }
 }
 ```
+Ogni processo andrà ad inviare la propria porzione di matrice ad i vicini ed a riceverla dagli altri processi.
+```c
+        //main_2.c
+            
+        char* preNeighbor = (char*) malloc(sendCount[prec] *sizeof(char));
+        char* destNeighbor = (char*) malloc(sendCount[dest] *sizeof(char));
 
-## Analisi del Codice
+        if(prec != -10){
+            //Ricevo dal precedente
+            MPI_Irecv(preNeighbor,sendCount[prec],MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req1);
+        }
+        //Ricevo dal successivo
+        if(dest != -10){
+            MPI_Irecv(destNeighbor,sendCount[dest],MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req2);
+        }
+        //Invio al precedente
+        //printf("Sendocunt[%d]:%d\n",my_rank,sendCount[my_rank]);
+        if(prec != -10){
+           MPI_Isend(recvBuff,sendCount[my_rank],MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req);
+        }
+        if(dest != -10){
+            //Invio al successivo
+            MPI_Isend(recvBuff,sendCount[my_rank],MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req);
+        }
+
+        MPI_Wait(&req1,&Stat1);
+        MPI_Wait(&req2,&Stat2);
+```
+
+```c
+    //main_2.c
+    
+    int total = 0;
+    char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
+    sendBuff = check(N, tempMatrix,sendCount,my_rank,prec,dest,total);
+```
+
+Qui avviene la costruzione ti una "matrice" temporanea che verrà costruita inserendo la porzione associata al processo corrente ed ai vicini, per semplificare i controlli.
+
+```c
+//myforest.h
+char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor,int* sendCount,int my_rank,int prec, int dest,int* total){
+        char *arr;
+        if(prec == -10){
+            arr = malloc(sizeof *arr * (sendCount[my_rank] + sendCount[dest]));
+        }else if(dest == -10){
+            arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank]));
+        }else{
+            arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank] + sendCount[dest]));
+        }
+
+        if(prec != -10){
+            memcpy(arr,preNeighbor,sendCount[prec]);
+            *total += sendCount[prec];
+            memcpy(arr+sendCount[prec],recvBuff,sendCount[my_rank]);
+            *total += sendCount[my_rank];
+            //printf("rank= %d - sendCount[my_rank] %d - sendCount[dest] = %d  dest= %d\n",my_rank,sendCount[my_rank],sendCount[dest],dest);
+            if(dest != -10){
+                memcpy(arr+sendCount[prec]+sendCount[my_rank],destNeighbor, sendCount[dest]);
+                *total += sendCount[dest];
+            }
+        }else{
+            memcpy(arr, recvBuff, sendCount[my_rank]);
+            *total += sendCount[my_rank];
+            //printf("sotto - rank= %d - sendCount[my_rank] %d - sendCount[dest] = %d  dest= %d  prec = %d\n",my_rank,sendCount[my_rank],sendCount[dest],dest,prec);
+            memcpy(arr+sendCount[my_rank],destNeighbor,sendCount[dest]);
+            *total += sendCount[dest];
+        }
+        return arr;
+}
+```
+Successivamente occorre inviare le rispettive porzioni analizzate da ogni processo slave al processo master, che dividerà nuovamente il lavoro tra i processi per la successiva iterazione se possibile(Matrice non vuota).
+
+```c
+MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+```
+
 ## Analisi Performance
 ## Conclusione
