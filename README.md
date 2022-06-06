@@ -36,7 +36,7 @@ cd docker-mpi
 docker build --no-cache -t dockermpi .
 docker run -it -t dockermpi:latest
 ```
-L'ambiente effettivo di esecuzione ha comportato invece la creazione di un Cluster omogeneo formato da N macchine.
+L'ambiente effettivo di esecuzione ha comportato invece la creazione di un Cluster omogeneo formato da N macchine.    
 É stato utilizzato [GCP(Google Cloud Platform)](https://cloud.google.com) per la creazione del cluster composto da 6 macchine __e2-standard-4(4 vCPU, 16GB di Memoria)__.
 
 La configurazione del cluster è stata realizzata mediante la seguente guida `https://github.com/spagnuolocarmine/ubuntu-openmpi-openmp`
@@ -46,6 +46,44 @@ L'algoritmo è stato implementato attraverso il Linguaggio C ed [OpenMPI](https:
 L'algoritmo prende in input N ed I, rispettivamente:
 * N - Dimensione della Matrice NxN
 * I - Numero di Iterazioni dell'algoritmo sulla Foresta a meno di terminazioni anticipate
+
+Il processo master si occupa della generazione di una matrice NxN che rappresenta la nostra foresta
+```c
+    char *forest = malloc(sizeof *forest * N * N); //Starter Forest Matrix
+
+    if(my_rank == 0){
+        generation(N,&forest);
+    }
+```
+
+```c
+#define F 10 //100    //Ignite probability F(Fire)
+#define P 70 //100       //New Tree probability
+
+#define TREE "🌲"
+#define BURNING_TREE "🔥"
+#define EMPTY "🚫"
+
+// 1(TREE) 2(EMPTY) 3(BURNING TREE)
+
+void generation(int N, char **matrix){
+    srand(42);
+    for(int i=0; i < N; i++){
+        for(int j =0; j < N; j++){
+            int randValue = (rand() % 101);
+            if(randValue <= F){
+                (*matrix)[(i*N)+j] = '3';
+            }else if(randValue > F && randValue <= P){
+                (*matrix)[(i*N)+j] = '1';
+            }else{
+                (*matrix)[(i*N)+j] = '2';
+            }
+        }
+    }
+}
+
+```
+
 
 ## Analisi del Codice
 ## Analisi Performance
