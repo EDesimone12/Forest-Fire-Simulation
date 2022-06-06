@@ -126,30 +126,6 @@ void precDest (int my_rank, int size_p, int *prec , int* dest){
     //printf("Sono %d , pre: %d  dest:%d \n",my_rank,*prec,*dest);
 }
 
-void divWork(int N, int size,int** sendCount, int** displacement){
-    //printf("Inizio divisione...\n");
-    int divVal = (N*N) / (size-1);
-    int restVal = (N*N) % (size-1);
-
-    int pos = 0;
-    (*displacement)[0] = 0;
-    (*sendCount)[0] = 0; //Al processo master non dò nulla da fare.
-
-    for(int i = 1; i < size;i++){
-        (*sendCount)[i] = divVal;
-        if(restVal > 0){
-            (*sendCount)[i]++;
-            restVal--;
-        }
-        //Calcolo il displacement per la scatterv
-        (*displacement)[i] = pos;
-        pos = pos + (*sendCount)[i];
-        //printf("Displ[%d]:%d \n",i,displacement[0][i]);
-        //printf("SendCount[%d]: %d \n ",i,sendCount[0][i]);
-    }
-    //printf("Fine divisione...\n");
-}
-
 void divWork2(int N, int size, int** sendCount, int** displacement){
     int numberOfRow = N / (size - 1);
     int restVal = N % (size - 1);
@@ -175,55 +151,46 @@ void divWork2(int N, int size, int** sendCount, int** displacement){
 char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor,int* sendCount,int my_rank,int prec, int dest,int* total){
         char *arr;
         if(prec == -10){
-            arr = malloc(sizeof *arr * (sendCount[my_rank] + sendCount[dest]));
+            arr = calloc((sendCount[my_rank] + N),sizeof(char) );
         }else if(dest == -10){
-            arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank]));
+            arr = calloc((sendCount[my_rank] + N),sizeof(char));
         }else{
-            arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank] + sendCount[dest]));
+            arr = calloc((N + sendCount[my_rank] + N),sizeof(char));
         }
         if(prec != -10){
-            memcpy(arr,preNeighbor,sendCount[prec]);
-            *total += sendCount[prec];
-            memcpy(arr+sendCount[prec],recvBuff,sendCount[my_rank]);
+            memcpy(arr,preNeighbor,N);
+            *total += N;
+            memcpy(arr+N,recvBuff,sendCount[my_rank]);
             *total += sendCount[my_rank];
-            //printf("rank= %d - sendCount[my_rank] %d - sendCount[dest] = %d  dest= %d\n",my_rank,sendCount[my_rank],sendCount[dest],dest);
             if(dest != -10){
-                memcpy(arr+sendCount[prec]+sendCount[my_rank],destNeighbor, sendCount[dest]);
-                *total += sendCount[dest];
+                memcpy(arr+N+sendCount[my_rank],destNeighbor, N);
+                *total += N;
             }
         }else{
             memcpy(arr, recvBuff, sendCount[my_rank]);
             *total += sendCount[my_rank];
-            //printf("sotto - rank= %d - sendCount[my_rank] %d - sendCount[dest] = %d  dest= %d  prec = %d\n",my_rank,sendCount[my_rank],sendCount[dest],dest,prec);
-            memcpy(arr+sendCount[my_rank],destNeighbor,sendCount[dest]);
-            *total += sendCount[dest];
+            memcpy(arr+sendCount[my_rank],destNeighbor,N);
+            *total += N;
         }
-
         return arr;
 }
-
+//START ED END
 char* check(int N, char* temp, int* sendCount, int rank,int prec, int dest, int total) {
     int startI = 0;
-    int startJ = 0;
-    int flag = 1;
-    char *retMatrix = malloc(sizeof *retMatrix * N * N);
+    char *retMatrix = (char*) calloc((N * N),sizeof(char));
     srand(rank + 1); //Annullo il comportamento di srand(1);
+    printf("rank:%d tot:%d temp:%s\n",rank,total,temp);
 
     //Starting point
     if (prec == -10) {
         startI = 0;
-        startJ = 0;
     } else {
-        startI = (sendCount[prec] / N);
-        startJ = (sendCount[prec] % N);
+        startI = 1;
+        total -= N;
     }
 
-    for (int i = startI; i < N && total != 0; i++) {
+    for (int i = startI; i < N && total > 0; i++) {
         for(int j = 0; j < N; j++){
-            if(flag){
-                j = startJ;
-                flag = 0;
-            }
             if (temp[(i*N)+j] == '3') { //1)A burning cell turns into an empty cell - 3 --> 2
                 retMatrix[(i*N)+j] = '2';
                 total--;
@@ -398,11 +365,13 @@ char* check(int N, char* temp, int* sendCount, int rank,int prec, int dest, int 
             total--;
         }
     }
-    printf("finito total:%d rank:%d\n",total,rank);
     //print_forest_array(N,retMatrix,rank);
+    printf("rank:%d tot:%d\n",rank,total);
     if(prec == -10){
         return retMatrix;
+    }else if(dest == -10){
+        return (retMatrix+N);
     }else{
-        return (retMatrix+sendCount[prec]);
+        return (retMatrix+N);
     }
 }
