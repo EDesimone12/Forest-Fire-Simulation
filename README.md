@@ -47,8 +47,13 @@ L'algoritmo prende in input N ed I, rispettivamente:
 * N - Dimensione della Matrice NxN
 * I - Numero di Iterazioni dell'algoritmo sulla Foresta a meno di terminazioni anticipate
 
-Il processo master si occupa della generazione di una matrice NxN che rappresenta la nostra foresta
+Il processo master si occupa della generazione di una matrice NxN che rappresenta la nostra foresta, viene poì calcolato il lavoro che spetta ad ogni processo
+e gli viene inviata la porzione di matrice da analizzare. Successivamente ogni processo invia in maniera asincrona la propria porzione da analizzare ad i vicini e riceverà quindi dagli altri processi.
+Ogni processo effettua i dovuti controlli sulla porzione di matrice assegnatagli ed invia al master la porzione aggiornata.
+
 ```c
+    //main_2.c
+    
     char *forest = malloc(sizeof *forest * N * N); //Starter Forest Matrix
 
     if(my_rank == 0){
@@ -57,6 +62,8 @@ Il processo master si occupa della generazione di una matrice NxN che rappresent
 ```
 
 ```c
+//myforest.h
+
 #define F 10 //100    //Ignite probability F(Fire)
 #define P 70 //100       //New Tree probability
 
@@ -83,7 +90,49 @@ void generation(int N, char **matrix){
 }
 
 ```
+In seguito occorre dividere il lavoro tra i processi slave ed inviargli le porzioni della foresta su cui lavorare.
 
+```c
+    //main_2.c
+    
+    //Calcolo il numero di elementi per ogni processo
+    int* sendCount = malloc ( size_p* sizeof(int));
+    int* displacement = malloc(size_p * sizeof(int));
+```
+
+```c
+    //main_2.c
+    divWork2(N,size_p,&sendCount,&displacement);
+    char *recvBuff = (char*) malloc(sendCount[my_rank]*sizeof(char));
+
+    MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
+```
+
+```c
+//myforest.h
+
+void divWork2(int N, int size, int** sendCount, int** displacement){
+    int numberOfRow = N / (size - 1);
+    int restVal = N % (size - 1);
+
+    int pos = 0;
+    (*displacement)[0] = 0;
+    (*sendCount)[0] = 0; //Al processo master non dò nulla da fare.
+
+    for(int i = 1; i < size;i++){
+        (*sendCount)[i] = (numberOfRow*N);
+        if(restVal > 0){
+            (*sendCount)[i] += N;
+            restVal--;
+        }
+        //Calcolo il displacement per la scatterv
+        (*displacement)[i] = pos;
+        pos = pos + (*sendCount)[i];
+        //printf("Displ[%d]:%d \n",i,displacement[0][i]);
+        //printf("SendCount[%d]: %d \n ",i,sendCount[0][i]);
+    }
+}
+```
 
 ## Analisi del Codice
 ## Analisi Performance
