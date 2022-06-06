@@ -53,9 +53,7 @@ int main(int argc, char *argv[]){
     if(my_rank == 0){
         srand(42);//Random Seed
         generation(N,&forest);
-        //generationDeterministic(N,&forest);
     }
-
 
     MPI_Request req = MPI_REQUEST_NULL; //Send
     MPI_Request req1 = MPI_REQUEST_NULL; //Recv pre
@@ -72,13 +70,13 @@ int main(int argc, char *argv[]){
 
         if(my_rank == 0){
             //Stampo la matrice
-            //print_forest(N,forest,index);
+            print_forest(N,forest,index);
         }
         if(my_rank != 0){
             precDest(my_rank,size_p,&prec,&dest);
         }
 
-        divWork(N,size_p,&sendCount,&displacement);
+        divWork2(N,size_p,&sendCount,&displacement);
         char *recvBuff = (char*) malloc(sendCount[my_rank]*sizeof(char));
 
         MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
@@ -120,17 +118,14 @@ int main(int argc, char *argv[]){
             int total = 0;
             char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
             sendBuff = check(N, tempMatrix,sendCount,my_rank,prec,dest,total);
-            printf("adf rank: %d\n",my_rank);
 
             free(preNeighbor);
             free(destNeighbor);
             free(tempMatrix);
         }
-        printf("Pre gatherv rank: %d\n",my_rank);
         MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
-        printf("Post gatherv rank: %d\n",my_rank);
         if(my_rank == 0){
-            //print_forest(N,forest,index);
+            print_forest(N,forest,index);
         }
         free(recvBuff);
         //free(sendBuff);
