@@ -213,6 +213,6 @@ Successivamente occorre inviare le rispettive porzioni analizzate da ogni proces
 ```c
 MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 ```
-
+## Correttezza della soluzione
 ## Analisi Performance
 ## Conclusione
