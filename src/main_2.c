@@ -119,16 +119,9 @@ int main(int argc, char *argv[]){
             MPI_Wait(&req1,&Stat1);
             MPI_Wait(&req2,&Stat2);
 
-            printf("waitall rank:%d recv:%s\n",my_rank,recvBuff);
-
             int total = 0;
-            //char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
-            //IL PROBLEMA è check
-            if(prec == -10){
-                sendBuff = check(N, recvBuff,sendCount,my_rank,prec,dest,total);
-            }else{
-                sendBuff = check(N, (recvBuff+N),sendCount,my_rank,prec,dest,total);
-            }
+            sendBuff = check(N, recvBuff,sendCount,my_rank,prec,dest,total);
+
             //free(tempMatrix);
         }
 

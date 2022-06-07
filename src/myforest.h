@@ -180,10 +180,8 @@ char* check(int N, char* temp, int* sendCount, int rank,int prec, int dest, int 
     int startI = 0;
     int end = 0;
     char *retMatrix = (char*) calloc((N * N),sizeof(char));
-    char *arr = (char*) calloc((N*N),sizeof(char));
 
     srand(rank + 1); //Annullo il comportamento di srand(1);
-    printf("rank:%d temp:%s\n",rank,temp);
 
     //Starting point
     if (prec == -10) {
@@ -196,8 +194,9 @@ char* check(int N, char* temp, int* sendCount, int rank,int prec, int dest, int 
     }else{
         end =  (sendCount[rank]/N);
     }
+    printf("rank:%d startI=%d end=%d temp:%s\n",rank,startI,end,temp);
 
-    for (int i = startI; i < end; i++) {
+    for (int i = startI; i < (sendCount[rank]/N); i++) {
         for(int j = 0; j < N; j++){
             if (temp[(i*N)+j] == '3') { //1)A burning cell turns into an empty cell - 3 --> 2
                 retMatrix[(i*N)+j] = '2';
@@ -374,15 +373,13 @@ char* check(int N, char* temp, int* sendCount, int rank,int prec, int dest, int 
         }
     }
     //print_forest_array(N,retMatrix,rank);
-    printf("rank:%d retMatr:%s\n",rank,retMatrix);
-    if(prec == -10){
-        memcpy(arr,retMatrix,sendCount[rank]);
-    }else {
-        memcpy(arr, (retMatrix + N), sendCount[rank]);
+    if(startI == 1){
+        printf("rank:%d ret:%s\n",rank,retMatrix+N);
+    }else{
+        printf("rank:%d ret:%s\n",rank,retMatrix);
     }
 
-    printf("rank:%d arr:%s\n",rank,arr);
-    return arr;
+    return retMatrix;
     /*if(prec == -10){
         return retMatrix;
     }else if(dest == -10){
