@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
     int* displacement = (int*) malloc(size_p * sizeof(int));
     
 
-    for(int index = 0; index < I && isEmpty(N,forest,my_rank); index++){
+    for(int index = 0; index < I /*&& isEmpty(N,forest,my_rank)*/; index++){
 
         if(my_rank == 0){
             //Stampo la matrice
@@ -81,19 +81,16 @@ int main(int argc, char *argv[]){
         if(my_rank == 1 || my_rank == (size_p-1)){
             recvBuff = (char*) calloc(sendCount[my_rank]+N,sizeof(char));
         }else{
-            recvBuff = (char*) calloc(sendCount[my_rank]+N,sizeof(char));
+            recvBuff = (char*) calloc(sendCount[my_rank]+(2*N),sizeof(char));
         }
 
         if(my_rank == 1){
-            MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,(recvBuff+N),sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
-        }else{
             MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
+        }else{
+            MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,(recvBuff+N),sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
         }
 
-
         if( my_rank != 0){
-            char* preNeighbor = (char*) calloc(N ,sizeof(char));
-            char* destNeighbor = (char*) calloc(N ,sizeof(char));
             if(prec != -10){
                 //Ricevo dal precedente
                 MPI_Irecv(recvBuff,N,MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req1);
@@ -101,55 +98,59 @@ int main(int argc, char *argv[]){
             //Ricevo dal successivo
             if(dest != -10){
                 if(my_rank == 1){
-                    MPI_Irecv(recvBuff+sendCount[my_rank],N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req2);
+                    MPI_Irecv((recvBuff+sendCount[my_rank]),N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req2);
                 }else{
-                    MPI_Irecv(recvBuff+N+sendCount[my_rank],N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req2);
+                    MPI_Irecv((recvBuff+N+sendCount[my_rank]),N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req2);
                 }
             }
             //Invio al precedente
             if(prec != -10){
-                MPI_Isend(recvBuff+N,N,MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req);
+                MPI_Isend((recvBuff+N),N,MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req);
             }
             if(dest != -10){
                 //Invio al successivo
                 if(my_rank == 1){
-                    MPI_Isend(recvBuff+sendCount[my_rank],N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req);
+                    MPI_Isend((recvBuff+sendCount[my_rank])-N,N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req);
                 }else{
-                    MPI_Isend(recvBuff+N+sendCount[my_rank],N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req);
+                    MPI_Isend((recvBuff+N+sendCount[my_rank])-N,N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req);
                 }
             }
 
             MPI_Wait(&req1,&Stat1);
             MPI_Wait(&req2,&Stat2);
 
+            printf("waitall rank:%d recv:%s\n",my_rank,recvBuff);
+
             int total = 0;
             //char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
-            sendBuff = check(N, recvBuff,sendCount,my_rank,prec,dest,total);
-            printf("rank:%d sendBUff: %s\n",my_rank,sendBuff);
-
-            free(preNeighbor);
-            free(destNeighbor);
+            //IL PROBLEMA è check
+            if(prec == -10){
+                sendBuff = check(N, recvBuff,sendCount,my_rank,prec,dest,total);
+            }else{
+                sendBuff = check(N, (recvBuff+N),sendCount,my_rank,prec,dest,total);
+            }
             //free(tempMatrix);
         }
 
 
-        MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+        //MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 
-        /*if(my_rank == 0){
-            print_forest(N,forest,index);
-        }*/
+        if(my_rank == 0){
+            //print_forest(N,forest,index);
+        }
         free(recvBuff);
     }
     /*if(my_rank != 0){
         free(sendBuff);
     }*/
+
+    /*if(!isEmpty(N,forest,my_rank)){
+        MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
+    }*/
+
     free(forest);
     free(sendCount);
     free(displacement);
-
-    if(!isEmpty(N,forest,my_rank)){
-        MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
-    }
 
     MPI_Barrier(MPI_COMM_WORLD); /* tutti i processi hanno terminato */
     end = MPI_Wtime();
