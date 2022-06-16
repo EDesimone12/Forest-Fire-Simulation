@@ -388,3 +388,11 @@ char* check(int N, char* temp, int* sendCount, int rank,int prec, int dest, int 
         return (retMatrix+N);
     }*/
 }
+
+void checkMine(char* recvBuff, char** temp, int start, int end, int rank, int prec, int dest,int N){
+    for(int i = start; i < end; i++){
+        for(int j = 0; j < N; j++){
+
+        }
+    }
+}

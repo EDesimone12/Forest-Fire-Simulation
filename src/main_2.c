@@ -116,11 +116,18 @@ int main(int argc, char *argv[]){
                 }
             }
 
+            //Lavoro sui miei elementi
+            int start = my_rank == 1 ? 0 : N;
+            int end = my_rank == 1 ? sendCount[my_rank] : sendCount[my_rank] + N;
+            char * temp = malloc(sizeof *forest * N * N); //Temp Matrix
+
+            checkMine(recvBuff,&temp,start,end,my_rank,prec,dest, N);
+
             MPI_Wait(&req1,&Stat1);
             MPI_Wait(&req2,&Stat2);
 
             int total = 0;
-            sendBuff = check(N, recvBuff,sendCount,my_rank,prec,dest,total);
+            //sendBuff = check(N, recvBuff,sendCount,my_rank,prec,dest,total);
 
             //free(tempMatrix);
         }
@@ -129,7 +136,7 @@ int main(int argc, char *argv[]){
         //MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 
         if(my_rank == 0){
-            //print_forest(N,forest,index);
+            print_forest(N,forest,index);
         }
         free(recvBuff);
     }
