@@ -389,10 +389,28 @@ char* check(int N, char* temp, int* sendCount, int rank,int prec, int dest, int 
     }*/
 }
 
+void burningTree(char* temp, char* recvBuff,int start ,int i, int j, int N){
+    if(i == start && j == 0 && (temp[(i*N)+j+1] == '3' || temp[((i+1)*N)+j] == '3')){
+        temp[(i*N)+j] = '3';
+    }
+}
+
 void checkMine(char* recvBuff, char** temp, int start, int end, int rank, int prec, int dest,int N){
     for(int i = start; i < end; i++){
         for(int j = 0; j < N; j++){
-
+            if(recvBuff[(i*N)+j] == '2'){ // 4) An empty space fills with a tree with probability p
+                if((rand() % 101) < P ){
+                    (*temp)[(i*N)+j] = '1';
+                }else{
+                    (*temp)[(i*N)+j] = recvBuff[(i*N)+j];
+                }
+            }else if(recvBuff[(i*N)+j] == '3') { //1) A burning cell turns into an empty cell
+                (*temp)[(i*N)+j] = '2';
+            }else if(recvBuff[(i*N)+j] == '1'){
+                    burningTree((*temp),recvBuff,i, j, N);
+                }
+            }
         }
-    }
 }
+
+
