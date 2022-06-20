@@ -389,28 +389,65 @@ char* check(int N, char* temp, int* sendCount, int rank,int prec, int dest, int 
     }*/
 }
 
-void burningTree(char* temp, char* recvBuff,int start ,int i, int j, int N){
-    if(i == start && j == 0 && (temp[(i*N)+j+1] == '3' || temp[((i+1)*N)+j] == '3')){
+void burningTree(char* temp, char* recvBuff,int start ,int end,int i, int j, int N){
+
+    if(i != start && recvBuff[((i*N)+j)-N] == '3'){
         temp[(i*N)+j] = '3';
+    }
+    if(i != (end -1) && recvBuff[((i*N)+j)+N] == '3'){
+        temp[(i*N)+j] = '3';
+    }
+    if(j != 0 && recvBuff[(i*N)+j-1] == '3' ){
+        temp[(i*N)+j] = '3';
+    }
+    if(j != N-1 && recvBuff[(i*N)+j+1] == '3' ){
+        temp[(i*N)+j] = '3';
+    }
+
+    /*if(i == start && j == 0 && (temp[(i*N)+j+1] == '3' || temp[((i+1)*N)+j] == '3')){
+        temp[(i*N)+j] = '3';
+    }else if(i == start && j == (N-1) && (temp[(i*N)+j-1] == '3' || temp[((i+1)*N)+j] == '3')){
+        temp[(i*N)+j] = '3';
+    }else if(i == (end-1) && j == 0 && (temp[(i*N)+j+1] == '3' || temp[((i-1)*N)+j] == '3')){
+        temp[(i*N)+j] = '3';
+    }else if(i == (end-1) && j == (N-1) && (temp[(i*N)+j-1] == '3' || temp[((i-1)*N)+j] == '3') ){
+        temp[(i*N)+j] = '3';
+    }else if(temp[(i*N)+j-1] == '3' || temp[((i-1)*N)+j] == '3' || temp[(i*N)+j+1] == '3' || temp[((i+1)*N)+j] == '3'){
+        temp[(i*N)+j] = '3';
+    }*/
+
+    if((rand() % 101) < F){
+        temp[(i*N)+j] = '3';
+    }else{
+        temp[(i*N)+j] = '1';
     }
 }
 
-void checkMine(char* recvBuff, char** temp, int start, int end, int rank, int prec, int dest,int N){
-    for(int i = start; i < end; i++){
+void checkMine(char* recvBuff, char* temp, int start, int end, int rank, int prec, int dest,int N,int flagNeighbor){
+    //flagNeighbor = 0 only mine , flagNeighbor = 1 neighbor's elements too
+    print_forest(N,recvBuff,80+rank);
+    printf("myrank: %d start: %d end: %d\n ", rank,start,(end/N));
+
+    for(int i = start; i < end/N; i++){
         for(int j = 0; j < N; j++){
             if(recvBuff[(i*N)+j] == '2'){ // 4) An empty space fills with a tree with probability p
                 if((rand() % 101) < P ){
-                    (*temp)[(i*N)+j] = '1';
+                    temp[(i*N)+j] = '1';
                 }else{
-                    (*temp)[(i*N)+j] = recvBuff[(i*N)+j];
+                    temp[(i*N)+j] = '2';
                 }
             }else if(recvBuff[(i*N)+j] == '3') { //1) A burning cell turns into an empty cell
-                (*temp)[(i*N)+j] = '2';
+                temp[(i*N)+j] = '2';
+            }else if(flagNeighbor == 0){
+                temp[(i*N)+j] = '1';
             }else if(recvBuff[(i*N)+j] == '1'){
-                    burningTree((*temp),recvBuff,i, j, N);
-                }
+                burningTree(temp,recvBuff,start,end,i, j, N);
+                //2) A tree will burn if at least one neighbor is burning
+                //3) A tree ignites with probability f even if no neighbor is burning
             }
         }
+    }
+
 }
 
 
