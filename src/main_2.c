@@ -49,6 +49,7 @@ int main(int argc, char *argv[]){
 
 
     char *forest = malloc(sizeof *forest * N * N); //Starter Forest Matrix
+    char *temp = malloc(sizeof *forest * N * N); //Temp Matrix
 
     if(my_rank == 0){
         srand(42);//Random Seed
@@ -64,30 +65,30 @@ int main(int argc, char *argv[]){
     //Calcolo il numero di elementi per ogni processo
     int* sendCount = (int*) malloc ( size_p* sizeof(int));
     int* displacement = (int*) malloc(size_p * sizeof(int));
-    
 
-    for(int index = 0; index < I /*&& isEmpty(N,forest,my_rank)*/; index++){
+    if(my_rank != 0){
+        precDest(my_rank,size_p,&prec,&dest);
+    }
+
+    divWork2(N,size_p,&sendCount,&displacement);
+    char *recvBuff;
+    if(my_rank == 1 || my_rank == (size_p-1)){
+        recvBuff = (char*) calloc(sendCount[my_rank]+N,sizeof(char));
+    }else{
+        recvBuff = (char*) calloc(sendCount[my_rank]+(2*N),sizeof(char));
+    }
+
+    if(my_rank == 1){
+        MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
+    }else{
+        MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,(recvBuff+N),sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
+    }
+
+    for(int index = 0; index < I; index++){
 
         if(my_rank == 0){
             //Stampo la matrice
             print_forest(N,forest,index);
-        }
-        if(my_rank != 0){
-            precDest(my_rank,size_p,&prec,&dest);
-        }
-
-        divWork2(N,size_p,&sendCount,&displacement);
-        char *recvBuff;
-        if(my_rank == 1 || my_rank == (size_p-1)){
-            recvBuff = (char*) calloc(sendCount[my_rank]+N,sizeof(char));
-        }else{
-            recvBuff = (char*) calloc(sendCount[my_rank]+(2*N),sizeof(char));
-        }
-
-        if(my_rank == 1){
-            MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
-        }else{
-            MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,(recvBuff+N),sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
         }
 
         if( my_rank != 0){
@@ -119,28 +120,28 @@ int main(int argc, char *argv[]){
             //Lavoro sui miei elementi
             int start = my_rank == 1 ? 0 : 1;
             int end = my_rank == 1 ? sendCount[my_rank] : sendCount[my_rank] + N;
-            char * temp = malloc(sizeof *forest * N * N); //Temp Matrix
 
-            checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N,0);
+            checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N,0); //flag a 0 check senza vicini
 
             MPI_Wait(&req1,&Stat1);
             MPI_Wait(&req2,&Stat2);
 
-            print_forest(N,temp,70+my_rank);
-            int total = 0;
-            //sendBuff = check(N, recvBuff,sendCount,my_rank,prec,dest,total);
+            checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N,1); //flag a 1 check con vicini
 
             //free(tempMatrix);
         }
+        char* suppPointer;
+        suppPointer = my_rank == 1 ? recvBuff : recvBuff+N;
+        recvBuff = my_rank == 1 ? temp : temp+N;
+        temp = suppPointer;
 
-
-        //MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
-
-        /*if(my_rank == 0){
-            print_forest(N,forest,index);
-        }*/
-        free(recvBuff);
+        //free(recvBuff);
     }
+    //MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+
+    /*if(my_rank == 0){
+        print_forest(N,forest,index);
+    }*/
 
     /*if(!isEmpty(N,forest,my_rank)){
         MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);

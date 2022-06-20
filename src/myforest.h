@@ -404,18 +404,6 @@ void burningTree(char* temp, char* recvBuff,int start ,int end,int i, int j, int
         temp[(i*N)+j] = '3';
     }
 
-    /*if(i == start && j == 0 && (temp[(i*N)+j+1] == '3' || temp[((i+1)*N)+j] == '3')){
-        temp[(i*N)+j] = '3';
-    }else if(i == start && j == (N-1) && (temp[(i*N)+j-1] == '3' || temp[((i+1)*N)+j] == '3')){
-        temp[(i*N)+j] = '3';
-    }else if(i == (end-1) && j == 0 && (temp[(i*N)+j+1] == '3' || temp[((i-1)*N)+j] == '3')){
-        temp[(i*N)+j] = '3';
-    }else if(i == (end-1) && j == (N-1) && (temp[(i*N)+j-1] == '3' || temp[((i-1)*N)+j] == '3') ){
-        temp[(i*N)+j] = '3';
-    }else if(temp[(i*N)+j-1] == '3' || temp[((i-1)*N)+j] == '3' || temp[(i*N)+j+1] == '3' || temp[((i+1)*N)+j] == '3'){
-        temp[(i*N)+j] = '3';
-    }*/
-
     if((rand() % 101) < F){
         temp[(i*N)+j] = '3';
     }else{
@@ -425,7 +413,6 @@ void burningTree(char* temp, char* recvBuff,int start ,int end,int i, int j, int
 
 void checkMine(char* recvBuff, char* temp, int start, int end, int rank, int prec, int dest,int N,int flagNeighbor){
     //flagNeighbor = 0 only mine , flagNeighbor = 1 neighbor's elements too
-    print_forest(N,recvBuff,80+rank);
     printf("myrank: %d start: %d end: %d\n ", rank,start,(end/N));
 
     for(int i = start; i < end/N; i++){
