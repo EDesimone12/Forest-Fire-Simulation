@@ -122,27 +122,47 @@ int main(int argc, char *argv[]){
             int start = my_rank == 1 ? 0 : 1;
             int end = my_rank == 1 ? sendCount[my_rank] : sendCount[my_rank] + N;
 
-            checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N,0); //flag a 0 check senza vicini
+            checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N); //flag a 0 check senza vicini
 
             MPI_Wait(&req1,&Stat1);
             MPI_Wait(&req2,&Stat2);
+            //
+            // printf("mrank:%d recvBuff:%s i=%d\n",my_rank,recvBuff,index);
 
-            checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N,1); //flag a 1 check con vicini
+            //checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N,1); //flag a 1 check con vicini
+            for(int i = start; i < end/N; i++){
+                for(int j = 0; j < N; j++){
+                    if(recvBuff[(i*N)+j] == '1'){
+                        burningTree(temp,recvBuff,start,end,i, j, N);
+                        //2) A tree will burn if at least one neighbor is burning
+                        //3) A tree ignites with probability f even if no neighbor is burning
+                    }
+                }
+            }
 
             //free(tempMatrix);
+            //printf("index:%d myrank:%d start:%d end:%d recv:%s\n",index,my_rank,start,end,recvBuff);
         }
+        printf("rank:%d recvBuff:%s I=%d\n",my_rank,recvBuff,I);
         char* suppPointer;
         suppPointer = my_rank == 1 ? recvBuff : recvBuff+N;
         recvBuff = my_rank == 1 ? temp : temp+N;
         temp = suppPointer;
 
+        /* Problemi ?
+         * 1) scambio di puntatori(non mi sembra)
+         * 2) dimensione di temp?
+         * 3) con più iterazioni c'è un problema sull'ultimo processo, recvBuff nullo...
+         */
         //free(recvBuff);
+
     }
+
     MPI_Gatherv(recvBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 
-    if(my_rank == 0){
+    /*if(my_rank == 0){
         print_forest(N,forest,I);
-    }
+    }*/
 
     /*if(!isEmpty(N,forest,my_rank)){
         MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);

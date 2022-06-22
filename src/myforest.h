@@ -411,13 +411,9 @@ void burningTree(char* temp, char* recvBuff,int start ,int end,int i, int j, int
     }
 }
 
-void checkMine(char* recvBuff, char* temp, int start, int end, int rank, int prec, int dest,int N,int flagNeighbor){
-    //flagNeighbor = 0 only mine , flagNeighbor = 1 neighbor's elements too
-    printf("myrank: %d start: %d end: %d\n ", rank,start,(end/N));
-
+void checkMine(char* recvBuff, char* temp, int start, int end, int rank, int prec, int dest,int N){
     for(int i = start; i < end/N; i++){
         for(int j = 0; j < N; j++){
-            if(flagNeighbor == 0){
                 if(recvBuff[(i*N)+j] == '2'){ // 4) An empty space fills with a tree with probability p
                     if((rand() % 101) <= P ){
                         temp[(i*N)+j] = '1';
@@ -426,19 +422,9 @@ void checkMine(char* recvBuff, char* temp, int start, int end, int rank, int pre
                     }
                 }else if(recvBuff[(i*N)+j] == '3') { //1) A burning cell turns into an empty cell
                     temp[(i*N)+j] = '2';
-                }else if(recvBuff[(i*N)+j] == '1'){
-                    temp[(i*N)+j] = '1';
                 }
-            }else {
-                if(recvBuff[(i*N)+j] == '1'){
-                    burningTree(temp,recvBuff,start,end,i, j, N);
-                    //2) A tree will burn if at least one neighbor is burning
-                    //3) A tree ignites with probability f even if no neighbor is burning
-                }
-            }
         }
     }
-
 }
 
 
