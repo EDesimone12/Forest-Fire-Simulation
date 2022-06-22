@@ -126,10 +126,7 @@ int main(int argc, char *argv[]){
 
             MPI_Wait(&req1,&Stat1);
             MPI_Wait(&req2,&Stat2);
-            //
-            printf("mrank:%d recvBuff:%s i=%d\n",my_rank,recvBuff,index);
 
-            //checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N,1); //flag a 1 check con vicini
             for(int i = start; i < end/N; i++){
                 for(int j = 0; j < N; j++){
                     if(recvBuff[(i*N)+j] == '1'){
@@ -141,7 +138,6 @@ int main(int argc, char *argv[]){
             }
 
             //free(tempMatrix);
-            //printf("index:%d myrank:%d start:%d end:%d recv:%s\n",index,my_rank,start,end,recvBuff);
         }
 
         char* suppPointer;
@@ -149,7 +145,6 @@ int main(int argc, char *argv[]){
         recvBuff = temp;
         temp = suppPointer;
 
-        printf("rank:%d temp:%s I=%d sendCount:%d\n",my_rank,recvBuff,index,sendCount[my_rank]);
         /* Problemi ?
          * 1) scambio di puntatori(non mi sembra)
          * 2) dimensione di temp?
