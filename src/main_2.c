@@ -145,20 +145,14 @@ int main(int argc, char *argv[]){
         recvBuff = temp;
         temp = suppPointer;
 
-        /* Problemi ?
-         * 1) scambio di puntatori(non mi sembra)
-         * 2) dimensione di temp?
-         * 3) con più iterazioni c'è un problema sull'ultimo processo, recvBuff nullo...
-         */
-        //free(recvBuff);
-
+        free(suppPointer);
     }
     if(my_rank == 1){
         MPI_Gatherv(recvBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
     }else{
         MPI_Gatherv(recvBuff+N,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
     }
-
+    free(recvBuff);
 
     if(my_rank == 0){
         print_forest(N,forest,I);
@@ -169,6 +163,7 @@ int main(int argc, char *argv[]){
     }*/
 
     free(forest);
+    //free(temp);
     free(sendCount);
     free(displacement);
 
