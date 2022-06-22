@@ -53,8 +53,8 @@ int main(int argc, char *argv[]){
 
     if(my_rank == 0){
         srand(42);//Random Seed
-        //generation(N,&forest);
-        generationDeterministic(N,&forest);
+        generation(N,&forest);
+        //generationDeterministic(N,&forest);
     }
 
     MPI_Request req = MPI_REQUEST_NULL; //Send
@@ -85,10 +85,10 @@ int main(int argc, char *argv[]){
         MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,(recvBuff+N),sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
     }
 
-    if(my_rank == 0){
+    /*if(my_rank == 0){
         //Stampo la matrice
         print_forest(N,forest,0);
-    }
+    }*/
 
     for(int index = 0; index < I; index++){
 
@@ -143,7 +143,6 @@ int main(int argc, char *argv[]){
         recvBuff = temp;
         temp = suppPointer;
 
-        //free(suppPointer);
     }
     if(my_rank == 1){
         MPI_Gatherv(recvBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
@@ -152,16 +151,16 @@ int main(int argc, char *argv[]){
     }
     free(recvBuff);
 
-    if(my_rank == 0){
+    /*if(my_rank == 0){
         print_forest(N,forest,I);
-    }
+    }*/
 
     /*if(!isEmpty(N,forest,my_rank)){
         MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
     }*/
 
     free(forest);
-    //free(temp);
+    free(temp);
     free(sendCount);
     free(displacement);
 
