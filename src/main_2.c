@@ -136,8 +136,6 @@ int main(int argc, char *argv[]){
                     }
                 }
             }
-
-            //free(tempMatrix);
         }
 
         char* suppPointer;
@@ -145,7 +143,7 @@ int main(int argc, char *argv[]){
         recvBuff = temp;
         temp = suppPointer;
 
-        free(suppPointer);
+        //free(suppPointer);
     }
     if(my_rank == 1){
         MPI_Gatherv(recvBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
@@ -170,7 +168,7 @@ int main(int argc, char *argv[]){
     MPI_Barrier(MPI_COMM_WORLD); /* tutti i processi hanno terminato */
     end = MPI_Wtime();
     MPI_Finalize();
-    if (my_rank == 0) { /* Master node scrive su stdout il tempo o su file */
+    if (my_rank == 0) { /* Master node scrive su stdout il tempo*/
         printf("Time in s = %f\n", end-start);
     }
 }
