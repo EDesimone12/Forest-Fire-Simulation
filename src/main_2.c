@@ -127,7 +127,7 @@ int main(int argc, char *argv[]){
             MPI_Wait(&req1,&Stat1);
             MPI_Wait(&req2,&Stat2);
             //
-            // printf("mrank:%d recvBuff:%s i=%d\n",my_rank,recvBuff,index);
+            printf("mrank:%d recvBuff:%s i=%d\n",my_rank,recvBuff,index);
 
             //checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N,1); //flag a 1 check con vicini
             for(int i = start; i < end/N; i++){
@@ -143,12 +143,13 @@ int main(int argc, char *argv[]){
             //free(tempMatrix);
             //printf("index:%d myrank:%d start:%d end:%d recv:%s\n",index,my_rank,start,end,recvBuff);
         }
-        printf("rank:%d recvBuff:%s I=%d\n",my_rank,recvBuff,I);
+
         char* suppPointer;
-        suppPointer = my_rank == 1 ? recvBuff : recvBuff+N;
-        recvBuff = my_rank == 1 ? temp : temp+N;
+        suppPointer = recvBuff;
+        recvBuff = temp;
         temp = suppPointer;
 
+        printf("rank:%d temp:%s I=%d sendCount:%d\n",my_rank,recvBuff,index,sendCount[my_rank]);
         /* Problemi ?
          * 1) scambio di puntatori(non mi sembra)
          * 2) dimensione di temp?
@@ -157,12 +158,16 @@ int main(int argc, char *argv[]){
         //free(recvBuff);
 
     }
+    if(my_rank == 1){
+        MPI_Gatherv(recvBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+    }else{
+        MPI_Gatherv(recvBuff+N,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+    }
 
-    MPI_Gatherv(recvBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 
-    /*if(my_rank == 0){
+    if(my_rank == 0){
         print_forest(N,forest,I);
-    }*/
+    }
 
     /*if(!isEmpty(N,forest,my_rank)){
         MPI_Abort(MPI_COMM_WORLD,EXIT_FAILURE);
