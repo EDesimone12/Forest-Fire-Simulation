@@ -322,4 +322,4 @@ L'input utilizzato per effettuare l'analisi è stato:
 
 ## Conclusioni
 
-Analizzando i benchmark e nello specifico i risultati ottenuti in termini di scalabilità forte e scalabilità debole, possiamo notare che l'introduzione del parallelismo ha portato un notevole vantaggio in termini di efficienza, osservabile analizzando lo speedup.
+Analizzando i benchmark e nello specifico i risultati ottenuti in termini di scalabilità forte e scalabilità debole possiamo notare che l'introduzione del parallelismo ha portato un notevole vantaggio, osservabile analizzando lo speedup,tenendo conto ovviamente dell'overhead introdotto dalla comunicazione tra i processi, e dalla latenza introdotta dall'utilizzo di un cluster.
