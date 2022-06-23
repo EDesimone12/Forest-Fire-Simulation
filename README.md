@@ -214,5 +214,33 @@ Successivamente occorre inviare le rispettive porzioni analizzate da ogni proces
 MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
 ```
 ## Correttezza della soluzione
-## Analisi Performance
+## Benchmark
+### Scalabilità Forte
+|Numero di Processi|Tempo(s)    |Speedup|
+|:----------------:|:----------:|:-----:|
+|1                 |27.242525   | 1.00  |
+|2                 |20.424715   | 1.33  |
+|3                 |13.919035   | 1.95  |
+|4                 |11.126861   | 2.44  |
+|5                 |9.303328    | 2.92  |
+|6                 |7.762574    | 3.51  |
+|7                 |6.550036    | 4.15  |
+|8                 |5.783624    | 4.71  |
+|9                 |5.238248    | 5.20  |
+|10                |4.806311    | 5.67  |
+|11                |4.596453    | 5.93  |
+|12                |4.669662    | 5.84  |
+|13                |4.017718    | 6.79  |
+|14                |3.678917    | 7.42  |
+|15                |3.514501    | 7.76  |
+|16                |3.336226    | 8.18  |
+|17                |3.172971    | 8.59  |
+|18                |3.041431    | 8.96  |
+|19                |2.980639    | 9.14  |
+|20                |3.128735    | 8.73  |
+|21                |2.704358    | 10.08 |
+|22                |2.671802    | 10.20 |
+|23                |2.584825    | 10.55 |
+
+### Scalabilità Debole
 ## Conclusione
