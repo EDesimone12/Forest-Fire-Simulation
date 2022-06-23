@@ -26,7 +26,7 @@ Il modello è definito da 4 regole fondamentali:
 >
 >Negli automi cellulari, il quartiere di von Neumann (o 4 quartieri) è classicamente definito su un bidimensionale reticolo quadrato ed è composto da una cella centrale e dalle sue quattro celle adiacenti. Il quartiere prende il nome John von Neumann, che lo ha utilizzato per definire il von Neumann automa cellulare.
 >
-> <img src="https://github.com/EDesimone12/Forest-Fire-Simulation/blob/main/img/Von_Neumann_neighborhood.png?raw=true" alt="Von_Neumann_neighborhood">
+> <p align="center"> <img src="https://github.com/EDesimone12/Forest-Fire-Simulation/blob/main/img/Von_Neumann_neighborhood.png?raw=true" alt="Von_Neumann_neighborhood"> </p>
 
 ## Configurazione Ambiente ed Esecuzione
 ### Prerequisiti
@@ -50,7 +50,7 @@ L'algoritmo prende in input N ed I, rispettivamente:
 Il processo master si occupa della generazione di una matrice NxN che rappresenta la nostra foresta, viene poì calcolato il lavoro che spetta ad ogni processo slave e gli viene inviata la porzione di matrice da analizzare.
 
 Successivamente ogni processo invia in maniera asincrona la propria porzione da analizzare ad i vicini e riceverà quindi dagli altri processi la loro parte.                     
-Ogni processo(slave) effettua i dovuti controlli sulla porzione di matrice assegnatagli ed invia al master la porzione aggiornata.    
+Ogni processo(slave) durante la fase di comunicazione asincrona inizia ad analizzare la porzione della matrice assegnatagli, indipendente dai vicini, una volta ricevuti gli elementi dai vicini vengono applicate le regole che comportano il controllo dei vicini e successivamente, terminate le iterazioni vengono inviate al master le invia al master la porzione aggiornata.    
 
 ## Analisi del Codice
 Analizziamo il codice associato alla generazione della foresta.
