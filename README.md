@@ -45,12 +45,12 @@ L'algoritmo è stato implementato attraverso il Linguaggio C ed [OpenMPI](https:
 
 L'algoritmo prende in input N ed I, rispettivamente:
 * N - Dimensione della Matrice NxN
-* I - Numero di Iterazioni dell'algoritmo sulla Foresta a meno di terminazioni anticipate
+* I - Numero di Iterazioni dell'algoritmo sulla Foresta
 
 Il processo master si occupa della generazione di una matrice NxN che rappresenta la nostra foresta, viene poì calcolato il lavoro che spetta ad ogni processo slave e gli viene inviata la porzione di matrice da analizzare.
 
-Successivamente ogni processo invia in maniera asincrona la propria porzione da analizzare ad i vicini e riceverà quindi dagli altri processi la loro parte.      
-Ogni processo(slave) effettua i dovuti controlli sulla porzione di matrice assegnatagli ed invia al master la porzione aggiornata.
+Successivamente ogni processo invia in maniera asincrona la propria porzione da analizzare ad i vicini e riceverà quindi dagli altri processi la loro parte.                     
+Ogni processo(slave) effettua i dovuti controlli sulla porzione di matrice assegnatagli ed invia al master la porzione aggiornata.    
 
 ## Analisi del Codice
 Analizziamo il codice associato alla generazione della foresta.
@@ -58,8 +58,10 @@ Analizziamo il codice associato alla generazione della foresta.
     //main_2.c
     
     char *forest = malloc(sizeof *forest * N * N); //Starter Forest Matrix
-
+    char *temp = malloc(sizeof *forest * N * N); //Temp Matrix
+    
     if(my_rank == 0){
+        srand(42);//Random Seed
         generation(N,&forest);
     }
 ```
@@ -106,9 +108,18 @@ In seguito occorre dividere il lavoro tra i processi slave ed inviargli le porzi
 ```c
     //main_2.c
     divWork2(N,size_p,&sendCount,&displacement);
-    char *recvBuff = (char*) malloc(sendCount[my_rank]*sizeof(char));
+    char *recvBuff;
+    if(my_rank == 1 || my_rank == (size_p-1)){
+        recvBuff = (char*) calloc(sendCount[my_rank]+N,sizeof(char));
+    }else{
+        recvBuff = (char*) calloc(sendCount[my_rank]+(2*N),sizeof(char));
+    }
 
-    MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
+    if(my_rank == 1){
+        MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,recvBuff,sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
+    }else{
+        MPI_Scatterv(forest,sendCount,displacement,MPI_CHAR,(recvBuff+N),sendCount[my_rank],MPI_CHAR,0,MPI_COMM_WORLD);
+    }
 ```
 
 ```c
@@ -131,86 +142,106 @@ void divWork2(int N, int size, int** sendCount, int** displacement){
         //Calcolo il displacement per la scatterv
         (*displacement)[i] = pos;
         pos = pos + (*sendCount)[i];
-        //printf("Displ[%d]:%d \n",i,displacement[0][i]);
-        //printf("SendCount[%d]: %d \n ",i,sendCount[0][i]);
+        //printf("Displ[%d]:%d \n",i,(*displacement)[i]);
+        //printf("SendCount[%d]: %d \n ",i,(*sendCount)[i]);
     }
 }
 ```
-Ogni processo andrà ad inviare la propria porzione di matrice ad i vicini ed a riceverla dagli altri processi.
+Ogni processo slave andrà ad inviare la propria porzione di matrice ad i vicini ed a riceverla dagli altri processi
 ```c
         //main_2.c
             
-        char* preNeighbor = (char*) malloc(sendCount[prec] *sizeof(char));
-        char* destNeighbor = (char*) malloc(sendCount[dest] *sizeof(char));
-
-        if(prec != -10){
-            //Ricevo dal precedente
-            MPI_Irecv(preNeighbor,sendCount[prec],MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req1);
-        }
-        //Ricevo dal successivo
-        if(dest != -10){
-            MPI_Irecv(destNeighbor,sendCount[dest],MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req2);
-        }
-        //Invio al precedente
-        //printf("Sendocunt[%d]:%d\n",my_rank,sendCount[my_rank]);
-        if(prec != -10){
-           MPI_Isend(recvBuff,sendCount[my_rank],MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req);
-        }
-        if(dest != -10){
-            //Invio al successivo
-            MPI_Isend(recvBuff,sendCount[my_rank],MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req);
-        }
-
-        MPI_Wait(&req1,&Stat1);
-        MPI_Wait(&req2,&Stat2);
+        if( my_rank != 0){
+            if(prec != -10){
+                //Ricevo dal precedente
+                MPI_Irecv(recvBuff,N,MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req1);
+            }
+            //Ricevo dal successivo
+            if(dest != -10){
+                if(my_rank == 1){
+                    MPI_Irecv((recvBuff+sendCount[my_rank]),N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req2);
+                }else{
+                    MPI_Irecv((recvBuff+N+sendCount[my_rank]),N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req2);
+                }
+            }
+            //Invio al precedente
+            if(prec != -10){
+                MPI_Isend((recvBuff+N),N,MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req);
+            }
+            if(dest != -10){
+                //Invio al successivo
+                if(my_rank == 1){
+                    MPI_Isend((recvBuff+sendCount[my_rank])-N,N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req);
+                }else{
+                    MPI_Isend((recvBuff+N+sendCount[my_rank])-N,N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req);
+                }
+            }
 ```
 
+Si inizia quindi ad analizzare la porzione della matrice che già detiene il processo mentre si attendono gli elementi dei vicini
 ```c
     //main_2.c
     
-    int total = 0;
-    char* tempMatrix = prepareForCheck(N,preNeighbor,recvBuff,destNeighbor, sendCount, my_rank,prec,dest,&total);
-    sendBuff = check(N, tempMatrix,sendCount,my_rank,prec,dest,total);
-```
+    //Lavoro sui miei elementi
+    int start = my_rank == 1 ? 0 : 1;
+    int end = my_rank == 1 ? sendCount[my_rank] : sendCount[my_rank] + N;
 
-Qui avviene la costruzione ti una "matrice" temporanea che verrà costruita inserendo la porzione associata al processo corrente ed ai vicini, per semplificare i controlli.
+    checkMine(recvBuff,temp,start,end,my_rank,prec,dest, N); //flag a 0 check senza vicini
+
+    MPI_Wait(&req1,&Stat1);
+    MPI_Wait(&req2,&Stat2);
+   
+```
 
 ```c
 //myforest.h
-char* prepareForCheck(int N, char* preNeighbor,char* recvBuff,char* destNeighbor,int* sendCount,int my_rank,int prec, int dest,int* total){
-        char *arr;
-        if(prec == -10){
-            arr = malloc(sizeof *arr * (sendCount[my_rank] + sendCount[dest]));
-        }else if(dest == -10){
-            arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank]));
-        }else{
-            arr = malloc(sizeof *arr * (sendCount[prec] + sendCount[my_rank] + sendCount[dest]));
+void checkMine(char* recvBuff, char* temp, int start, int end, int rank, int prec, int dest,int N){
+    for(int i = start; i < end/N; i++){
+        for(int j = 0; j < N; j++){
+                if(recvBuff[(i*N)+j] == '2'){ // 4) An empty space fills with a tree with probability p
+                    if((rand() % 101) <= P ){
+                        temp[(i*N)+j] = '1';
+                    }else{
+                        temp[(i*N)+j] = '2';
+                    }
+                }else if(recvBuff[(i*N)+j] == '3') { //1) A burning cell turns into an empty cell
+                    temp[(i*N)+j] = '2';
+                }
         }
-
-        if(prec != -10){
-            memcpy(arr,preNeighbor,sendCount[prec]);
-            *total += sendCount[prec];
-            memcpy(arr+sendCount[prec],recvBuff,sendCount[my_rank]);
-            *total += sendCount[my_rank];
-            //printf("rank= %d - sendCount[my_rank] %d - sendCount[dest] = %d  dest= %d\n",my_rank,sendCount[my_rank],sendCount[dest],dest);
-            if(dest != -10){
-                memcpy(arr+sendCount[prec]+sendCount[my_rank],destNeighbor, sendCount[dest]);
-                *total += sendCount[dest];
-            }
-        }else{
-            memcpy(arr, recvBuff, sendCount[my_rank]);
-            *total += sendCount[my_rank];
-            //printf("sotto - rank= %d - sendCount[my_rank] %d - sendCount[dest] = %d  dest= %d  prec = %d\n",my_rank,sendCount[my_rank],sendCount[dest],dest,prec);
-            memcpy(arr+sendCount[my_rank],destNeighbor,sendCount[dest]);
-            *total += sendCount[dest];
-        }
-        return arr;
+    }
 }
 ```
-Successivamente occorre inviare le rispettive porzioni analizzate da ogni processo slave al processo master, che dividerà nuovamente il lavoro tra i processi per la successiva iterazione se possibile(Matrice non vuota).
+
+Successivamente occorre analizzare i vicini degli elementi per determinare l'espandersi delle fiamme
 
 ```c
-MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+            for(int i = start; i < end/N; i++){
+                for(int j = 0; j < N; j++){
+                    if(recvBuff[(i*N)+j] == '1'){
+                        burningTree(temp,recvBuff,start,end,i, j, N);
+                        //2) A tree will burn if at least one neighbor is burning
+                        //3) A tree ignites with probability f even if no neighbor is burning
+                    }
+                }
+            }
+```
+Il tutto a partire dall'invio/ricezione dei vicini, all'interno di un ciclo che itera su I, infine viene effettuato uno swap dei puntatori per continuare a lavorare nelle successive iterazioni alla porzione di matrice aggiornata
+
+```c
+        char* suppPointer;
+        suppPointer = recvBuff;
+        recvBuff = temp;
+        temp = suppPointer;
+```
+
+Una volta terminate le iterazioni si procede con l'invio al processo master delle porzioni di matrice aggiornate da ogni processo slave
+
+```c
+    if(my_rank == 1){
+        MPI_Gatherv(recvBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+    }else{
+        MPI_Gatherv(recvBuff+N,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
+    }
 ```
 ## Correttezza della soluzione
 ## Benchmark
