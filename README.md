@@ -283,6 +283,7 @@ L'input utilizzato per effettuare l'analisi è stato:
 |21                |2.704358    | 10.08 |
 |22                |2.671802    | 10.20 |
 |23                |2.584825    | 10.55 |
+<img width="500" height="500" src="https://github.com/EDesimone12/Forest-Fire-Simulation/blob/main/img/scalabilit%C3%A0_forte.png?raw=true" alt="Scalabilità_Forte">
 
 ### Scalabilità Debole
 Anche la scalabilità debole è stata ottenuta analizzando più esecuzioni dell'algoritmo sul Cluster. 
@@ -316,4 +317,9 @@ L'input utilizzato per effettuare l'analisi è stato:
 |21                |8.427413    | 8400x8400         |50                 |
 |22                |9.056979    | 8800x8800         |50                 |
 |23                |9.590614    | 9200x9200         |50                 |
-## Conclusione
+
+<img width="500" height="500" src="https://github.com/EDesimone12/Forest-Fire-Simulation/blob/main/img/scalabilit%C3%A0_debole.png?raw=true" alt="Scalabilità_Debole">
+
+## Conclusioni
+
+Analizzando i benchmark e nello specifico i risultati ottenuti in termini di scalabilità forte e scalabilità debole, possiamo notare che l'introduzione del parallelismo ha portato un notevole vantaggio in termini di efficienza, osservabile analizzando lo speedup.
