@@ -47,11 +47,10 @@ L'algoritmo prende in input N ed I, rispettivamente:
 * N - Dimensione della Matrice NxN
 * I - Numero di Iterazioni dell'algoritmo sulla Foresta a meno di terminazioni anticipate
 
-Il processo master si occupa della generazione di una matrice NxN che rappresenta la nostra foresta, viene poì calcolato il lavoro che spetta ad ogni processo
-e gli viene inviata la porzione di matrice da analizzare. 
+Il processo master si occupa della generazione di una matrice NxN che rappresenta la nostra foresta, viene poì calcolato il lavoro che spetta ad ogni processo slave e gli viene inviata la porzione di matrice da analizzare.
 
 Successivamente ogni processo invia in maniera asincrona la propria porzione da analizzare ad i vicini e riceverà quindi dagli altri processi la loro parte.      
-Ogni processo effettua i dovuti controlli sulla porzione di matrice assegnatagli ed invia al master la porzione aggiornata.
+Ogni processo(slave) effettua i dovuti controlli sulla porzione di matrice assegnatagli ed invia al master la porzione aggiornata.
 
 ## Analisi del Codice
 Analizziamo il codice associato alla generazione della foresta.
@@ -215,7 +214,19 @@ MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,M
 ```
 ## Correttezza della soluzione
 ## Benchmark
+Di seguito sono mostrate le misurazioni effettuate utilizzando il Cluster omogeneo [già descritto](#configurazione-ambiente-ed-esecuzione) .        
+
+Sono state effettuate le misurazioni per ottenere:
+* __Scalabilità Forte__
+* __Scalabilità Debole__
+
 ### Scalabilità Forte
+La scalabilità forte è stata ottenuta analizzando più esecuzioni dell'algoritmo, utilizzando il Cluster configurato, aumentando il numero di processi ad ogni esecuzione, utilizzando quindi da 2 vCPU a 24 vCPU. 
+
+L'input utilizzato per effettuare l'analisi è stato:
+* N = 5000
+* I = 50
+
 |Numero di Processi|Tempo(s)    |Speedup|
 |:----------------:|:----------:|:-----:|
 |1                 |27.242525   | 1.00  |
@@ -243,6 +254,12 @@ MPI_Gatherv(sendBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,M
 |23                |2.584825    | 10.55 |
 
 ### Scalabilità Debole
+Anche la scalabilità debole è stata ottenuta analizzando più esecuzioni dell'algoritmo sul Cluster. 
+
+L'input utilizzato per effettuare l'analisi è stato:
+* N = 400*np
+* I = 50
+
 |Numero di Processi|Tempo(s)    |Dimensione Input(N)|Dimensione Input(I)|
 |:----------------:|:----------:|:-----------------:|:-----------------:|
 |1                 |0.698966    | 400x400           |50                 |   
