@@ -26,7 +26,7 @@ Il modello è definito da 4 regole fondamentali:
 >
 >Negli automi cellulari, il quartiere di von Neumann (o 4 quartieri) è classicamente definito su un bidimensionale reticolo quadrato ed è composto da una cella centrale e dalle sue quattro celle adiacenti. Il quartiere prende il nome John von Neumann, che lo ha utilizzato per definire il von Neumann automa cellulare.
 >
-> <p align="center"> <img src="/img/Von_Neumann_neighborhood.png" alt="Von_Neumann_neighborhood"> </p>
+> <p align="center"> <img width="200" height="200" src="./img/Von_Neumann_neighborhood.png" alt="Von_Neumann_neighborhood"> </p>
 
 ## Configurazione Ambiente ed Esecuzione
 ### Prerequisiti
@@ -283,7 +283,7 @@ L'input utilizzato per effettuare l'analisi è stato:
 |21                |2.704358    | 10.08 |
 |22                |2.671802    | 10.20 |
 |23                |2.584825    | 10.55 |
-<img width="500" height="500" src="/img/scalabilità_forte.png" alt="Scalabilità_Forte">
+<img width="500" height="500" src="./img/scalabilità_forte.png" alt="Scalabilità_Forte">
 
 ### Scalabilità Debole
 Anche la scalabilità debole è stata ottenuta analizzando più esecuzioni dell'algoritmo sul Cluster. 
@@ -318,7 +318,7 @@ L'input utilizzato per effettuare l'analisi è stato:
 |22                |9.056979    | 8800x8800         |50                 |
 |23                |9.590614    | 9200x9200         |50                 |
 
-<img width="500" height="500" src="/img/scalabilità_debole.png" alt="Scalabilità_Debole">
+<img width="500" height="500" src="./img/scalabilità_debole.png" alt="Scalabilità_Debole">
 
 ## Conclusioni
 
