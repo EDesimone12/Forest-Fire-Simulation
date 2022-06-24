@@ -36,7 +36,27 @@ Per configurare l'ambiente di sviluppo è stato utilizzato un container Docker c
 ```
 docker run -it --mount src="$(pwd)",target=/home,type=bind spagnuolocarmine/docker-mpi:latest
 ```
-L'ambiente effettivo di esecuzione ha comportato invece la creazione di un Cluster omogeneo formato da N macchine.    
+
+Per l'esecuzione, spostarsi nell directory
+
+```
+cd /home/Forest-Fire-SImulation/src/
+```
+
+compilare utilizzando il comando
+```
+mpicc main.c -o main.out
+```
+ed eseguire utilizzando il comando seguente, inserendo i valori senza apici:
+* np = Numero processi
+* N = Dimensione matrice
+* I = Numero di iterazioni
+
+```
+mpirun --allow-run-as-root -np "np" main.out "N" "I"
+```
+
+L'ambiente effettivo di esecuzione, e quindi di misurazione ha comportato invece la creazione di un Cluster omogeneo formato da N macchine.    
 É stato utilizzato [GCP(Google Cloud Platform)](https://cloud.google.com) per la creazione del cluster composto da 6 macchine __e2-standard-4(4 vCPU, 16GB di Memoria)__.
 
 La configurazione del cluster è stata realizzata mediante la seguente guida `https://github.com/spagnuolocarmine/ubuntu-openmpi-openmp`
