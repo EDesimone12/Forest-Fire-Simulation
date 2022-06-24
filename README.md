@@ -244,6 +244,51 @@ Una volta terminate le iterazioni si procede con l'invio al processo master dell
     }
 ```
 ## Correttezza della soluzione
+La correttezza dell'algoritmo è stata provando impostando i valori di __P__ ed __F__ a __100__ .
+
+```c
+//myforest.h
+
+#define TAG 42
+#define F 100     //Ignite probability F(Fire)
+#define P 100       //New Tree probability
+
+#define TREE "🌲"
+#define BURNING_TREE "🔥"
+#define EMPTY "🚫"
+```
+É stata scritta una nuova funzione per l'inizializzazione della matrice che invece di valori randomici sfrutta il modulo dell'indice del for per generare la matrice.
+Quindi è stato eseguito l'algoritmo utilizzando un numero fissato per l'input e variando il numero di processi, è stato così possibile osservare che la matrice in output era sempre uguale provando appunto la correttezza dell'algoritmo.
+
+```c
+//main.c
+
+    if(my_rank == 0){
+        srand(42);//Random Seed
+        generationDeterministic(N,&forest);
+    }
+```
+
+```c
+//myforest.h
+
+void generationDeterministic(int N, char **matrix){
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < N; j++){
+            if((i % 3) == 0){
+                (*matrix)[(i*N)+j] = '1'; //TREE
+            }else if((i % 3) == 1){
+                (*matrix)[(i*N)+j] = '2'; //EMPTY
+            }else{
+                (*matrix)[(i*N)+j] = '3'; //BURNING TREE
+            }
+        }
+    }
+}
+```
+
+
+
 ## Benchmark
 Di seguito sono mostrate le misurazioni effettuate utilizzando il Cluster omogeneo [già descritto](#configurazione-ambiente-ed-esecuzione) .        
 
