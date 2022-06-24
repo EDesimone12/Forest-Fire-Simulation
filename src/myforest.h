@@ -4,8 +4,8 @@
 #include <wchar.h>
 
 #define TAG 42
-#define F 100//10 //100    //Ignite probability F(Fire)
-#define P 100//70 //100       //New Tree probability
+#define F 10     //Ignite probability F(Fire)
+#define P 70       //New Tree probability
 
 #define TREE "🌲"
 #define BURNING_TREE "🔥"
