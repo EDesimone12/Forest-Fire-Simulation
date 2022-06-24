@@ -75,7 +75,7 @@ Ogni processo(slave) durante la fase di comunicazione asincrona inizia ad analiz
 ## Analisi del Codice
 Analizziamo il codice associato alla generazione della foresta.
 ```c
-    //main_2.c
+    //main.c
     
     char *forest = malloc(sizeof *forest * N * N); //Starter Forest Matrix
     char *temp = malloc(sizeof *forest * N * N); //Temp Matrix
@@ -235,6 +235,8 @@ void checkMine(char* recvBuff, char* temp, int start, int end, int rank, int pre
 Successivamente occorre analizzare i vicini degli elementi per determinare l'espandersi delle fiamme
 
 ```c
+//main.c
+
             for(int i = start; i < end/N; i++){
                 for(int j = 0; j < N; j++){
                     if(recvBuff[(i*N)+j] == '1'){
@@ -248,6 +250,8 @@ Successivamente occorre analizzare i vicini degli elementi per determinare l'esp
 Il tutto a partire dall'invio/ricezione dei vicini, all'interno di un ciclo che itera su I, infine viene effettuato uno swap dei puntatori per continuare a lavorare nelle successive iterazioni alla porzione di matrice aggiornata
 
 ```c
+//main.c
+
         char* suppPointer;
         suppPointer = recvBuff;
         recvBuff = temp;
@@ -257,6 +261,8 @@ Il tutto a partire dall'invio/ricezione dei vicini, all'interno di un ciclo che 
 Una volta terminate le iterazioni si procede con l'invio al processo master delle porzioni di matrice aggiornate da ogni processo slave
 
 ```c
+//main.c
+
     if(my_rank == 1){
         MPI_Gatherv(recvBuff,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
     }else{
