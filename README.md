@@ -1,12 +1,13 @@
 # Forest-Fire-Simulation
-## Introduzione
-Il [Forest-Fire-Model](https://en.wikipedia.org/wiki/Forest-fire_model) è un modello di [cellular automata](https://en.wikipedia.org/wiki/Cellular_automaton) definito attraverso una matrice NxN.
-Ogni cella della matrice utilizzata in questo modello può assumere i seguenti stati:
+## Introduction
+The [Forest-Fire-Model](https://en.wikipedia.org/wiki/Forest-fire_model) is a [cellular automata](https://en.wikipedia.org/wiki/Cellular_automaton) model defined through an NxN matrix.
+
+Each cell of the matrix used in this model can assume the following states:
 * __TREE__
 * __EMPTY__
 * __BURNING_TREE__
 
-All'interno del progetto rappresentati attraverso:
+The states are represented within the project through these symbols:
 
 |ASCII Charachter | Stato | Emoji |
 |------------------|------|-------|
@@ -14,66 +15,67 @@ All'interno del progetto rappresentati attraverso:
 |2|EMPTY|🚫|
 |3|BURNING_TREE|🔥|
 
-Il modello è definito da 4 regole fondamentali:
-1. Una cella in fiamme(__BURNING_TREE__) si trasforma in una cella vuota(__EMPTY__)
-2. Un albero(__TREE__) andrà in fiamme se almeno un vicino è in fiamme(__BURNING_TREE__).
-3. Un albero(__TREE__) andrà in fiamme con probabilità __*f*__ anche se non ci sono vicini in fiamme(__BURNING_TREE__).
-4. In una cella vuota(__EMPTY__) crescerà un albero(__TREE__) con probabilità __*p*__.
+The model is defined by 4 fundamental rules:
+1. A burning cell(__BURNING_TREE__) turns into an empty cell(__EMPTY__)
+2. A tree(__TREE__) will go up in flames if at least one neighbor is on fire(__BURNING_TREE__).
+3. A tree(__TREE__) will go up in flames with a probability __*f*__ even if there are no neighbors on fire(__BURNING_TREE__).
+4. In an empty cell(__EMPTY__) a tree will gorw(__TREE__) with probability __*p*__.
 
-### Il concetto di vicinanza utilizzato
+### The concept of proximity used   
 
->__Quartiere di Von Neumann__
+>__Neighborhood of Von Neumann__
 >
->Negli automi cellulari, il quartiere di von Neumann (o 4 quartieri) è classicamente definito su un bidimensionale reticolo quadrato ed è composto da una cella centrale e dalle sue quattro celle adiacenti. Il quartiere prende il nome John von Neumann, che lo ha utilizzato per definire il von Neumann automa cellulare.
+>In cellular automata, the von Neumann neighborhood (or 4 neighborhoods) is classically defined on a two-dimensional square lattice and is composed of a central cell and its four adjacent cells. The neighborhood is named after John von Neumann, who used it to define the von Neumann cellular automaton.
 >
 > <p align="center"> <img width="200" height="200" src="./img/Von_Neumann_neighborhood.png" alt="Von_Neumann_neighborhood"> </p>
 
-## Configurazione Ambiente ed Esecuzione
-### Prerequisiti
+## Environment Configuration and Execution
+### Prerequisites
 * Ubuntu 18.04 LTS
 * Docker
-Per configurare l'ambiente di sviluppo è stato utilizzato un container Docker creato a partire da:
+A Docker container was used to configure the development environment, this docker container was created from:
 ```
 docker run -it --mount src="$(pwd)",target=/home,type=bind spagnuolocarmine/docker-mpi:latest
 ```
 
-Per l'esecuzione, spostarsi nell directory
+To execute, change to the directory to
 
 ```
 cd /home/Forest-Fire-SImulation/src/
 ```
 
-compilare utilizzando il comando
+compile using the command
 ```
 mpicc main.c -o main.out
 ```
-ed eseguire utilizzando il comando seguente, inserendo i valori senza apici:
-* np = Numero processi
-* N = Dimensione matrice
-* I = Numero di iterazioni
+and executes using the command below, entering the values without quotes:
+* np = Number of process
+* N = Matrix dimension
+* I = Number of iteration
 
 ```
 mpirun --allow-run-as-root -np "np" main.out "N" "I"
 ```
 
-L'ambiente effettivo di esecuzione, e quindi di misurazione ha comportato invece la creazione di un Cluster omogeneo formato da N macchine.    
-É stato utilizzato [GCP(Google Cloud Platform)](https://cloud.google.com) per la creazione del cluster composto da 6 macchine __e2-standard-4(4 vCPU, 16GB di Memoria)__.
+The required execution environment, and therefore of measurement, involved the creation of a homogeneous Cluster made up of N machines.               
+[GCP(Google Cloud Platform)](https://cloud.google.com) was used for the cluster creation composed by 6 machine __e2-standard-4(4 vCPU, 16GB of Memory)__.    
 
-La configurazione del cluster è stata realizzata mediante la seguente guida `https://github.com/spagnuolocarmine/ubuntu-openmpi-openmp`
-## Soluzione Proposta
-L'algoritmo è stato implementato attraverso il Linguaggio C ed [OpenMPI](https://www.open-mpi.org/doc/), un'implementazione dello standard [MPI(Message Passing Interface)](https://it.wikipedia.org/wiki/Message_Passing_Interface#Implementazioni)
+The cluster configuration was done using the following guide       `https://github.com/spagnuolocarmine/ubuntu-openmpi-openmp`
+## Proposed solution
+The algorithm was implemented through the C language and the [OpenMPI](https://www.open-mpi.org/doc/) library, an implementation of the standard [MPI(Message Passing Interface)](https://it.wikipedia.org/wiki/Message_Passing_Interface#Implementazioni)
 
-L'algoritmo prende in input N ed I, rispettivamente:
-* N - Dimensione della Matrice NxN
-* I - Numero di Iterazioni dell'algoritmo sulla Foresta
+The algorithm takes N and I as input, respectively:
+* N - Dimension of the Matrix NxN
+* I - Number of iteration of the algorithm over the forest.
 
-Il processo master si occupa della generazione di una matrice NxN che rappresenta la nostra foresta, viene poì calcolato il lavoro che spetta ad ogni processo slave e gli viene inviata la porzione di matrice da analizzare.
+The master process takes care of the generation of an NxN matrix that represents our forest, the work that is up to each slave process is then calculated and the portion of the matrix to be analyzed is sent to it.    
 
-Successivamente ogni processo invia in maniera asincrona la propria porzione da analizzare ad i vicini e riceverà quindi dagli altri processi la loro parte.                     
-Ogni processo(slave) durante la fase di comunicazione asincrona inizia ad analizzare la porzione della matrice assegnatagli, indipendente dai vicini, una volta ricevuti gli elementi dai vicini vengono applicate le regole che comportano il controllo dei vicini e successivamente, terminate le iterazioni vengono inviate al master le invia al master la porzione aggiornata.    
+Subsequently, each process asynchronously sends its portion to be analyzed to the neighbors and will then receive their part from the other processes.    
 
-## Analisi del Codice
-Analizziamo il codice associato alla generazione della foresta.
+Each process (slave) during the asynchronous communication phase begins to analyze the portion of the matrix assigned to it, independent of the neighbors, once the elements are received from the neighbors, the rules involving the control of the neighbors are applied and subsequently, once the iterations are finished, they are sent to the master sends the updated portion to the master.         
+
+## Analysis of the code
+Let's look at the code associated with generating the forest.   
 ```c
     //main.c
     
@@ -115,12 +117,12 @@ void generation(int N, char **matrix){
 }
 
 ```
-In seguito occorre dividere il lavoro tra i processi slave ed inviargli le porzioni della foresta su cui lavorare.
+Then it is necessary to divide the work between the slave processes and send them the portions of the forest to work on.      
 
 ```c
     //main_2.c
     
-    //Calcolo il numero di elementi per ogni processo
+    //Calculating the number of elements for each process
     int* sendCount = malloc ( size_p* sizeof(int));
     int* displacement = malloc(size_p * sizeof(int));
 ```
@@ -167,7 +169,7 @@ void divWork2(int N, int size, int** sendCount, int** displacement){
     }
 }
 ```
-Ogni processo slave andrà ad inviare la propria porzione di matrice ad i vicini ed a riceverla dagli altri processi
+Each slave process will send its own portion of the matrix to its neighbours and receive it from the other processes.
 ```c
         //main_2.c
             
@@ -184,12 +186,12 @@ Ogni processo slave andrà ad inviare la propria porzione di matrice ad i vicini
                     MPI_Irecv((recvBuff+N+sendCount[my_rank]),N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req2);
                 }
             }
-            //Invio al precedente
+            //Sending to the previous
             if(prec != -10){
                 MPI_Isend((recvBuff+N),N,MPI_CHAR,prec,TAG,MPI_COMM_WORLD,&req);
             }
             if(dest != -10){
-                //Invio al successivo
+                //Sending to next
                 if(my_rank == 1){
                     MPI_Isend((recvBuff+sendCount[my_rank])-N,N,MPI_CHAR,dest,TAG,MPI_COMM_WORLD,&req);
                 }else{
@@ -198,11 +200,11 @@ Ogni processo slave andrà ad inviare la propria porzione di matrice ad i vicini
             }
 ```
 
-Si inizia quindi ad analizzare la porzione della matrice che già detiene il processo mentre si attendono gli elementi dei vicini
+We then start analysing the portion of the matrix that already holds the process while waiting for the elements of the neighbouring.
 ```c
     //main_2.c
     
-    //Lavoro sui miei elementi
+    //Working on my elements
     int start = my_rank == 1 ? 0 : 1;
     int end = my_rank == 1 ? sendCount[my_rank] : sendCount[my_rank] + N;
 
@@ -232,7 +234,7 @@ void checkMine(char* recvBuff, char* temp, int start, int end, int rank, int pre
 }
 ```
 
-Successivamente occorre analizzare i vicini degli elementi per determinare l'espandersi delle fiamme
+Next, the neighbours of the elements must be analysed to determine the spread of the flames.        
 
 ```c
 //main.c
@@ -247,7 +249,7 @@ Successivamente occorre analizzare i vicini degli elementi per determinare l'esp
                 }
             }
 ```
-Il tutto a partire dall'invio/ricezione dei vicini, all'interno di un ciclo che itera su I, infine viene effettuato uno swap dei puntatori per continuare a lavorare nelle successive iterazioni alla porzione di matrice aggiornata
+This is done by sending/receiving neighbours, within a loop that iterates over I, and finally a swap of pointers is performed to continue working in subsequent iterations to the updated portion of the matrix.         
 
 ```c
 //main.c
@@ -258,7 +260,8 @@ Il tutto a partire dall'invio/ricezione dei vicini, all'interno di un ciclo che 
         temp = suppPointer;
 ```
 
-Una volta terminate le iterazioni si procede con l'invio al processo master delle porzioni di matrice aggiornate da ogni processo slave
+
+Once the iterations are complete, the updated portions of the matrix from each slave process are sent to the master process.
 
 ```c
 //main.c
@@ -269,8 +272,8 @@ Una volta terminate le iterazioni si procede con l'invio al processo master dell
         MPI_Gatherv(recvBuff+N,sendCount[my_rank],MPI_CHAR,forest,sendCount,displacement,MPI_CHAR,0,MPI_COMM_WORLD);
     }
 ```
-## Correttezza della soluzione
-La correttezza dell'algoritmo è stata provando impostando i valori di __P__ ed __F__ a __100__ .
+## Correctness of the solution
+The correctness of the algorithm was tested by setting the values of __P__ and __F__ to __100__ .    
 
 ```c
 //myforest.h
@@ -283,8 +286,8 @@ La correttezza dell'algoritmo è stata provando impostando i valori di __P__ ed 
 #define BURNING_TREE "🔥"
 #define EMPTY "🚫"
 ```
-É stata scritta una nuova funzione per l'inizializzazione della matrice che invece di valori randomici sfrutta il modulo dell'indice del for per generare la matrice.
-Quindi è stato eseguito l'algoritmo utilizzando un numero fissato per l'input e variando il numero di processi, è stato così possibile osservare che la matrice in output era sempre uguale provando appunto la correttezza dell'algoritmo.
+A new function was written for the initialisation of the matrix, which instead of random values uses the modulus of the for index to generate the matrix.
+Then the algorithm was run using a fixed number for the input and varying the number of processes, so it was possible to observe that the output matrix was always the same, thus proving the correctness of the algorithm.    
 
 ```c
 //main.c
@@ -316,20 +319,20 @@ void generationDeterministic(int N, char **matrix){
 
 
 ## Benchmark
-Di seguito sono mostrate le misurazioni effettuate utilizzando il Cluster omogeneo [già descritto](#configurazione-ambiente-ed-esecuzione) .        
+Shown below are the measurements made using the Homogeneous Cluster [already described](#configurazione-ambiente-ed-esecuzione) .        
 
-Sono state effettuate le misurazioni per ottenere:
-* __Scalabilità Forte__
-* __Scalabilità Debole__
+Measurements have been taken to obtain:
+* __Strong Scalability__
+* __Weak Scalability__
 
-### Scalabilità Forte
-La scalabilità forte è stata ottenuta analizzando più esecuzioni dell'algoritmo, utilizzando il Cluster configurato, aumentando il numero di processi ad ogni esecuzione, utilizzando quindi da 2 vCPU a 24 vCPU. 
+### Strong Scalability
+Strong scalability was achieved by analysing multiple executions of the algorithm, using the configured cluster, increasing the number of processes at each execution, thus using from 2 vCPU to 24 vCPU.   
 
-L'input utilizzato per effettuare l'analisi è stato:
+The input used to perform the analysis was:
 * N = 5000
 * I = 50
 
-|Numero di Processi|Tempo(s)    |Speedup|
+|Number of Processes|Time(s)    |Speedup|
 |:----------------:|:----------:|:-----:|
 |1                 |27.242525   | 1.00  |
 |2                 |20.424715   | 1.33  |
@@ -356,14 +359,14 @@ L'input utilizzato per effettuare l'analisi è stato:
 |23                |2.584825    | 10.55 |
 <img width="500" height="500" src="./img/scalabilità_forte.png" alt="Scalabilità_Forte">
 
-### Scalabilità Debole
-Anche la scalabilità debole è stata ottenuta analizzando più esecuzioni dell'algoritmo sul Cluster. 
+### Weak Scalability
+Weak scalability was also achieved by analysing multiple executions of the algorithm on the cluster.
 
-L'input utilizzato per effettuare l'analisi è stato:
+The input used to perform the analysis was:
 * N = 400*np
 * I = 50
 
-|Numero di Processi|Tempo(s)    |Dimensione Input(N)|Dimensione Input(I)|
+|Numero of Processes|Time(s)    |Input Dimension(N)|Input Dimension(I)|
 |:----------------:|:----------:|:-----------------:|:-----------------:|
 |1                 |0.698966    | 400x400           |50                 |   
 |2                 |1.189706    | 800x800           |50                 |
@@ -391,6 +394,6 @@ L'input utilizzato per effettuare l'analisi è stato:
 
 <img width="500" height="500" src="./img/scalabilità_debole.png" alt="Scalabilità_Debole">
 
-## Conclusioni
+## Conclusions
 
-Analizzando i benchmark e nello specifico i risultati ottenuti in termini di scalabilità forte e scalabilità debole possiamo notare che l'introduzione del parallelismo ha portato un notevole vantaggio, osservabile analizzando lo speedup,tenendo conto ovviamente dell'overhead introdotto dalla comunicazione tra i processi, e dalla latenza introdotta dall'utilizzo di un cluster.
+Analysing the benchmarks and specifically the results obtained in terms of strong scalability and weak scalability, we can see that the introduction of parallelism has brought a considerable advantage, which can be observed by analysing the speedup, obviously taking into account the overhead introduced by the communication between processes, and the latency introduced by the use of a cluster.    
